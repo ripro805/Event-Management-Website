@@ -2,6 +2,10 @@
 
 A modern event management web application built with Django and Tailwind CSS.
 
+## 🌐 Live Demo
+
+🔗 **[View Live Application](https://event-management-website-qvpy.onrender.com/)**
+
 ## Features
 
 - **Event Management**: Create, update, and delete events with detailed information
