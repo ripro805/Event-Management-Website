@@ -61,9 +61,22 @@ def admin_dashboard(request):
 def user_list(request):
     """List all users in the system"""
     users = User.objects.all().order_by('-date_joined')
+    
+    # Get role counts
+    admin_count = User.objects.filter(groups__name='Admin').distinct().count()
+    organizer_count = User.objects.filter(groups__name='Organizer').distinct().count()
+    participant_count = User.objects.filter(groups__name='Participant').distinct().count()
+    
+    # Get all available groups for the modal
+    all_groups = Group.objects.all().order_by('name')
+    
     context = {
         'title': 'User Management',
         'users': users,
+        'admin_count': admin_count,
+        'organizer_count': organizer_count,
+        'participant_count': participant_count,
+        'all_groups': all_groups,
     }
     return render(request, 'admin_panel/user_list.html', context)
 

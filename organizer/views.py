@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
 from datetime import date
 
@@ -10,17 +10,22 @@ from .forms import CategoryForm, EventForm, ParticipantForm
 
 # ==================== Helper Functions ====================
 
-def is_admin_or_organizer(user):
-    """Check if user is Admin or Organizer"""
-    if not user.is_authenticated:
-        return False
-    return user.is_superuser or user.groups.filter(name__in=['Admin', 'Organizer']).exists()
+
+# Custom permission decorator for organizer views
+from functools import wraps
+def organizer_permission_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or not (user.is_superuser or user.groups.filter(name__in=['Admin', 'Organizer']).exists()):
+            return render(request, 'nopermission.html')
+        return view_func(request, *args, **kwargs)
+    return login_required(_wrapped_view)
 
 
 # ==================== Organizer Dashboard ====================
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def organizer_dashboard(request):
     """Organizer dashboard with event management statistics"""
     total_events = Event.objects.count()
@@ -44,8 +49,7 @@ def organizer_dashboard(request):
 
 # ==================== Category Views ====================
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def category_list(request):
     """Display list of all categories"""
     categories = Category.objects.prefetch_related('events').all()
@@ -56,15 +60,13 @@ def category_list(request):
     return render(request, 'organizer/category_list.html', context)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def category_detail(request, pk):
     """Redirect to public category detail page"""
     return redirect('events:category_detail', pk=pk)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def category_create(request):
     """Create a new category"""
     if request.method == 'POST':
@@ -86,8 +88,7 @@ def category_create(request):
     return render(request, 'organizer/category_form.html', context)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def category_update(request, pk):
     """Update an existing category"""
     category = get_object_or_404(Category, pk=pk)
@@ -112,8 +113,7 @@ def category_update(request, pk):
     return render(request, 'organizer/category_form.html', context)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def category_delete(request, pk):
     """Delete a category"""
     category = get_object_or_404(Category, pk=pk)
@@ -133,8 +133,7 @@ def category_delete(request, pk):
 
 # ==================== Event Views ====================
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def event_list(request):
     """Display list of all events with filters"""
     events = Event.objects.select_related('category').prefetch_related('participants').annotate(
@@ -165,15 +164,13 @@ def event_list(request):
     return render(request, 'organizer/event_list.html', context)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def event_detail(request, pk):
     """Redirect to public event detail page"""
     return redirect('events:event_detail', pk=pk)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def event_create(request):
     """Create a new event"""
     if request.method == 'POST':
@@ -195,8 +192,7 @@ def event_create(request):
     return render(request, 'organizer/event_form.html', context)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def event_update(request, pk):
     """Update an existing event"""
     event = get_object_or_404(Event, pk=pk)
@@ -221,8 +217,7 @@ def event_update(request, pk):
     return render(request, 'organizer/event_form.html', context)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def event_delete(request, pk):
     """Delete an event"""
     event = get_object_or_404(Event, pk=pk)
@@ -242,8 +237,7 @@ def event_delete(request, pk):
 
 # ==================== Participant Views ====================
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def participant_list(request):
     """Display list of all participants"""
     participants = Participant.objects.prefetch_related('events').all()
@@ -254,15 +248,13 @@ def participant_list(request):
     return render(request, 'organizer/participant_list.html', context)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def participant_detail(request, pk):
     """Redirect to public participant detail page"""
     return redirect('events:participant_detail', pk=pk)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def participant_create(request):
     """Create a new participant"""
     if request.method == 'POST':
@@ -284,8 +276,7 @@ def participant_create(request):
     return render(request, 'organizer/participant_form.html', context)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def participant_update(request, pk):
     """Update an existing participant"""
     participant = get_object_or_404(Participant, pk=pk)
@@ -310,8 +301,7 @@ def participant_update(request, pk):
     return render(request, 'organizer/participant_form.html', context)
 
 
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='/')
+@organizer_permission_required
 def participant_delete(request, pk):
     """Delete a participant"""
     participant = get_object_or_404(Participant, pk=pk)
