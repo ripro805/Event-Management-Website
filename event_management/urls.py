@@ -20,7 +20,19 @@ from django.urls import path, include
 from django.conf import settings
 
 urlpatterns = [
+    # Django Admin Panel (built-in)
     path("admin/", admin.site.urls),
+    
+    # User Panel - Authentication & User Dashboard
+    path("user/", include("user_panel.urls")),
+    
+    # Organizer Panel - Event, Category, Participant Management
+    path("organizer/", include("organizer.urls")),
+    
+    # Admin Panel - Custom Admin Features
+    path("admin-panel/", include("admin_panel.urls")),
+    
+    # Events App - Public Views (Home, Event List, etc.)
     path("", include("events.urls")),
 ]
 

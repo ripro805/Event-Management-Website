@@ -1,36 +1,8 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if form.instance.pk %}Edit Category{% else %}Create Category{% endif %} - Event Management</title>
-    <link href="{% static 'css/output.css' %}" rel="stylesheet">
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex space-x-8">
-                    <a href="{% url 'events:home' %}" class="inline-flex items-center px-1 pt-1 text-gray-700 hover:text-blue-600 transition-colors">
-                        Home
-                    </a>
-                    <a href="{% url 'events:category_list' %}" class="inline-flex items-center px-1 pt-1 text-blue-600 border-b-2 border-blue-600 font-medium">
-                        Categories
-                    </a>
-                    <a href="{% url 'events:event_list' %}" class="inline-flex items-center px-1 pt-1 text-gray-700 hover:text-blue-600 transition-colors">
-                        Events
-                    </a>
-                    <a href="{% url 'events:participant_list' %}" class="inline-flex items-center px-1 pt-1 text-gray-700 hover:text-blue-600 transition-colors">
-                        Participants
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
+{% extends 'base.html' %}
 
-    <!-- Main Content -->
+{% block title %}{% if form.instance.pk %}Edit Category{% else %}Create Category{% endif %}{% endblock %}
+
+{% block content %}
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Breadcrumb -->
         <div class="mb-6">
@@ -148,5 +120,4 @@
             </form>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}

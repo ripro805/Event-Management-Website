@@ -1,5 +1,5 @@
 from django import forms
-from .models import Category, Event, Participant
+from events.models import Category, Event, Participant
 
 
 class CategoryForm(forms.ModelForm):

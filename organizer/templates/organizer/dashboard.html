@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Organizer Dashboard</h1>
+        <p class="mt-2 text-gray-600">Manage your events, categories, and participants</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Total Events</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ total_events }}</p>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-full">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Categories</p>
+                    <p class="text-3xl font-bold text-green-600">{{ total_categories }}</p>
+                </div>
+                <div class="bg-green-100 p-3 rounded-full">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Participants</p>
+                    <p class="text-3xl font-bold text-purple-600">{{ total_participants }}</p>
+                </div>
+                <div class="bg-purple-100 p-3 rounded-full">
+                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Upcoming</p>
+                    <p class="text-3xl font-bold text-orange-600">{{ upcoming_events }}</p>
+                </div>
+                <div class="bg-orange-100 p-3 rounded-full">
+                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="{% url 'organizer:event_create' %}" class="flex items-center p-4 border-2 border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+                <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span class="text-blue-600 font-medium">Create New Event</span>
+            </a>
+            <a href="{% url 'organizer:category_create' %}" class="flex items-center p-4 border-2 border-green-200 rounded-lg hover:bg-green-50 transition-colors">
+                <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span class="text-green-600 font-medium">Create Category</span>
+            </a>
+            <a href="{% url 'organizer:participant_create' %}" class="flex items-center p-4 border-2 border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
+                <svg class="w-6 h-6 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span class="text-purple-600 font-medium">Add Participant</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Events -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Events</h2>
+        {% if recent_events %}
+            <div class="space-y-4">
+                {% for event in recent_events %}
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                        <div>
+                            <h3 class="font-semibold text-gray-900">{{ event.name }}</h3>
+                            <p class="text-sm text-gray-600">{{ event.date }} | {{ event.location }}</p>
+                        </div>
+                        <a href="{% url 'organizer:event_detail' event.pk %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            View
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">No events created yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

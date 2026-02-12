@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Category(models.Model):
@@ -28,6 +29,13 @@ class Event(models.Model):
         related_name="events",
         verbose_name="Category"
     )
+    # Replace participants ManyToMany with User model
+    participants = models.ManyToManyField(
+        User,
+        related_name="registered_events",
+        verbose_name="Registered Participants",
+        blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -40,21 +48,35 @@ class Event(models.Model):
         return f"{self.name} - {self.date}"
 
 
+# Keep Participant model for backward compatibility (will be deprecated)
+# Use User model with 'Participant' group instead
 class Participant(models.Model):
-    """Model representing an event participant"""
+    """
+    DEPRECATED: Use User model with 'Participant' group instead
+    This model is kept for backward compatibility with existing data
+    """
     name = models.CharField(max_length=200, verbose_name="Participant Name")
     email = models.EmailField(unique=True, verbose_name="Email Address")
     events = models.ManyToManyField(
         Event, 
-        related_name="participants",
+        related_name="old_participants",  # Changed to avoid conflict
         verbose_name="Registered Events",
         blank=True
     )
     registered_at = models.DateTimeField(auto_now_add=True)
     
+    # Link to User model
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="participant_profile"
+    )
+    
     class Meta:
-        verbose_name = "Participant"
-        verbose_name_plural = "Participants"
+        verbose_name = "Participant (Legacy)"
+        verbose_name_plural = "Participants (Legacy)"
         ordering = ['name']
     
     def __str__(self):
