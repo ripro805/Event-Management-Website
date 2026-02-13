@@ -186,7 +186,7 @@ def event_detail(request, pk):
 def event_create(request):
     """Create a new event"""
     if request.method == 'POST':
-        form = EventForm(request.POST)
+        form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             event = form.save()
             messages.success(request, f'Event "{event.name}" created successfully!')
@@ -210,7 +210,7 @@ def event_update(request, pk):
     event = get_object_or_404(Event, pk=pk)
     
     if request.method == 'POST':
-        form = EventForm(request.POST, instance=event)
+        form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
             event = form.save()
             messages.success(request, f'Event "{event.name}" updated successfully!')

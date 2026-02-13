@@ -34,9 +34,8 @@ class Event(models.Model):
     )
     image = models.ImageField(
         upload_to='events/',
-        default='events/default.jpg',
+        default='default_image.jpg',
         blank=True,
-        null=True,
         verbose_name="Event Image"
     )
     # RSVP: ManyToMany with User through RSVP model

@@ -151,9 +151,8 @@ STATICFILES_DIRS = [
 ]
 
 # Media files (user uploads)
-# Media files (user uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'static' / 'images'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Email and site settings
 SITE_URL = 'http://127.0.0.1:8000'  # Change to production URL as needed
