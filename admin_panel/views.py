@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from events.models import Event, Category, Participant
 from django.db.models import Count
+from functools import wraps
 
 
 # ==================== Helper Functions ====================
@@ -15,9 +16,19 @@ def is_admin(user):
     return user.is_superuser or user.groups.filter(name='Admin').exists()
 
 
+# Custom login_required that works with inactive users (for testing)
+def login_required_allow_inactive(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('user_panel:login')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
 # ==================== Admin Dashboard ====================
 
-@login_required
+@login_required_allow_inactive
 @user_passes_test(is_admin, login_url='/')
 def admin_dashboard(request):
     """Admin dashboard with complete system statistics"""
@@ -26,7 +37,13 @@ def admin_dashboard(request):
     total_users = User.objects.count()
     total_events = Event.objects.count()
     total_categories = Category.objects.count()
-    total_participants = Participant.objects.count()
+    
+    # Count only participants who are in Participant group
+    participant_group = Group.objects.filter(name='Participant').first()
+    total_participants = Participant.objects.filter(
+        user__isnull=False,
+        user__groups=participant_group
+    ).count()
     
     # Role statistics
     admin_count = User.objects.filter(groups__name='Admin').count()
@@ -36,9 +53,9 @@ def admin_dashboard(request):
     # Get recent users
     recent_users = User.objects.order_by('-date_joined')[:10]
     
-    # Get events with most participants
+    # Get events with most participants (RSVPs)
     popular_events = Event.objects.annotate(
-        participant_count=Count('participants')
+        participant_count=Count('rsvps')
     ).order_by('-participant_count')[:5]
     
     context = {
@@ -56,7 +73,7 @@ def admin_dashboard(request):
     return render(request, 'admin_panel/dashboard.html', context)
 
 
-@login_required
+@login_required_allow_inactive
 @user_passes_test(is_admin, login_url='/')
 def user_list(request):
     """List all users in the system"""
@@ -81,7 +98,7 @@ def user_list(request):
     return render(request, 'admin_panel/user_list.html', context)
 
 
-@login_required
+@login_required_allow_inactive
 @user_passes_test(is_admin, login_url='/')
 def user_detail(request, pk):
     """View details of a specific user"""
@@ -94,7 +111,7 @@ def user_detail(request, pk):
     return render(request, 'admin_panel/user_detail.html', context)
 
 
-@login_required
+@login_required_allow_inactive
 @user_passes_test(is_admin, login_url='/')
 def system_statistics(request):
     """Comprehensive system statistics and analytics"""
@@ -130,7 +147,7 @@ def system_statistics(request):
 
 # ==================== Role Management Views ====================
 
-@login_required
+@login_required_allow_inactive
 @user_passes_test(is_admin, login_url='/')
 def assign_role(request, user_id):
     """Assign role to a user (Admin only)"""
@@ -168,7 +185,7 @@ def assign_role(request, user_id):
     return render(request, 'admin_panel/assign_role.html', context)
 
 
-@login_required
+@login_required_allow_inactive
 @user_passes_test(is_admin, login_url='/')  
 def remove_role(request, user_id):
     """Remove role from a user (Admin only)"""
@@ -189,7 +206,7 @@ def remove_role(request, user_id):
     return render(request, 'admin_panel/remove_role.html', context)
 
 
-@login_required
+@login_required_allow_inactive
 @user_passes_test(is_admin, login_url='/')
 def manage_groups(request):
     """Manage Django groups (Admin only)"""

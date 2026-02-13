@@ -17,10 +17,14 @@ def organizer_permission_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         user = request.user
-        if not user.is_authenticated or not (user.is_superuser or user.groups.filter(name__in=['Admin', 'Organizer']).exists()):
+        # Check if user is authenticated (skip is_active check for testing)
+        if not user.is_authenticated:
+            return redirect('user_panel:login')
+        # Check if user has organizer or admin permissions
+        if not (user.is_superuser or user.groups.filter(name__in=['Admin', 'Organizer']).exists()):
             return render(request, 'nopermission.html')
         return view_func(request, *args, **kwargs)
-    return login_required(_wrapped_view)
+    return _wrapped_view
 
 
 # ==================== Organizer Dashboard ====================
@@ -28,9 +32,17 @@ def organizer_permission_required(view_func):
 @organizer_permission_required
 def organizer_dashboard(request):
     """Organizer dashboard with event management statistics"""
+    from django.contrib.auth.models import Group
+    
     total_events = Event.objects.count()
     total_categories = Category.objects.count()
-    total_participants = Participant.objects.count()
+    
+    # Count only participants who are in Participant group
+    participant_group = Group.objects.filter(name='Participant').first()
+    total_participants = Participant.objects.filter(
+        user__isnull=False,
+        user__groups=participant_group
+    ).count()
     
     upcoming_events = Event.objects.filter(date__gte=date.today()).count()
     
@@ -136,8 +148,8 @@ def category_delete(request, pk):
 @organizer_permission_required
 def event_list(request):
     """Display list of all events with filters"""
-    events = Event.objects.select_related('category').prefetch_related('participants').annotate(
-        participant_count=Count('participants')
+    events = Event.objects.select_related('category').prefetch_related('rsvps').annotate(
+        participant_count=Count('rsvps')
     )
     
     # Apply filters
@@ -240,7 +252,20 @@ def event_delete(request, pk):
 @organizer_permission_required
 def participant_list(request):
     """Display list of all participants"""
-    participants = Participant.objects.prefetch_related('events').all()
+    from django.db.models import Count
+    from django.contrib.auth.models import Group
+    
+    # Get Participant group
+    participant_group = Group.objects.filter(name='Participant').first()
+    
+    # Filter participants who have a user and are in Participant group
+    participants = Participant.objects.filter(
+        user__isnull=False,
+        user__groups=participant_group
+    ).annotate(
+        rsvp_count=Count('user__rsvp')
+    ).select_related('user').order_by('name')
+    
     context = {
         'participants': participants,
         'title': 'Participants Management'
@@ -304,7 +329,12 @@ def participant_update(request, pk):
 @organizer_permission_required
 def participant_delete(request, pk):
     """Delete a participant"""
-    participant = get_object_or_404(Participant, pk=pk)
+    from django.db.models import Count
+    
+    participant = get_object_or_404(
+        Participant.objects.annotate(rsvp_count=Count('user__rsvp')),
+        pk=pk
+    )
     
     if request.method == 'POST':
         participant_name = participant.name

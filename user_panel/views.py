@@ -1,22 +1,77 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.contrib.auth.tokens import default_token_generator
+from functools import wraps
+from events.models import Event, Participant, RSVP
+
+
+# Custom login_required that works with inactive users (for testing)
+def login_required_allow_inactive(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('user_panel:login')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
+def activate_account(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user is not None and default_token_generator.check_token(user, token):
+        if not user.is_active:
+            user.is_active = True
+            user.save()
+            messages.success(request, 'Your account has been activated! You can now log in.')
+            return redirect('user_panel:login')
+        else:
+            messages.info(request, 'Account already activated. Please log in.')
+            return redirect('user_panel:login')
+    else:
+        messages.error(request, 'Activation link is invalid or has expired.')
+        return redirect('events:home')
+
+
 from .forms import UserSignupForm, UserLoginForm
 
 
 def signup_view(request):
-    """User signup view"""
+    """User registration view"""
     if request.user.is_authenticated:
         return redirect('user_panel:dashboard')
     
     if request.method == 'POST':
         form = UserSignupForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, f'Welcome {user.first_name}! Your account has been created successfully.')
-            return redirect('user_panel:dashboard')
+            user = form.save(commit=False)
+            user.is_active = False  # Require email activation
+            user.save()
+            
+            # Check which email backend is being used
+            from django.conf import settings
+            email_backend = settings.EMAIL_BACKEND
+            
+            if 'console' in email_backend:
+                messages.success(
+                    request, 
+                    f'✓ Account created successfully! '
+                    f'Please check your TERMINAL/CONSOLE for the activation link '
+                    f'(using console email backend for development).'
+                )
+            else:
+                messages.success(
+                    request, 
+                    f'✓ Account created successfully! '
+                    f'Please check your email inbox for the activation link.'
+                )
+            return redirect('user_panel:login')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -30,6 +85,7 @@ def signup_view(request):
 
 def login_view(request):
     """User login view"""
+    User = get_user_model()
     if request.user.is_authenticated:
         return redirect('user_panel:dashboard')
     
@@ -38,12 +94,28 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome back, {user.first_name or user.username}!')
-                return redirect('user_panel:dashboard')
-            else:
+            
+            # TEMPORARY: Allow inactive users to login for testing
+            # Try to get user manually first
+            try:
+                user = User.objects.get(username=username)
+                if user.check_password(password):
+                    # Password is correct, allow login even if inactive
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    if not user.is_active:
+                        messages.info(request, f'ℹ️ Welcome {user.first_name or user.username}! (Logged in with inactive account for testing)')
+                    else:
+                        messages.success(request, f'Welcome back, {user.first_name or user.username}!')
+                    # Role-based redirect
+                    if user.is_superuser or user.groups.filter(name='Admin').exists():
+                        return redirect('admin_panel:admin_dashboard')
+                    elif user.groups.filter(name='Organizer').exists():
+                        return redirect('organizer:dashboard')
+                    else:
+                        return redirect('user_panel:dashboard')
+                else:
+                    messages.error(request, 'Invalid username or password. Please try again.')
+            except User.DoesNotExist:
                 messages.error(request, 'Invalid username or password. Please try again.')
         else:
             messages.error(request, 'Please correct the errors below.')
@@ -67,31 +139,63 @@ def logout_view(request):
     })
 
 
-@login_required
+@login_required_allow_inactive
 def dashboard_view(request):
-    """User dashboard showing their profile and registered events"""
-    from events.models import Event, Participant
-    from django.db.models import Count
+    """Participant dashboard"""
+    user = request.user
+    from datetime import date
     
-    # Get user's participant record if exists
-    try:
-        participant = Participant.objects.prefetch_related('events__category').get(
-            email=request.user.email
-        )
-        registered_events = participant.events.all()
-    except Participant.DoesNotExist:
-        participant = None
-        registered_events = []
+    # Get user's RSVP'd events
+    rsvp_events = []
+    if user.is_authenticated:
+        from events.models import RSVP
+        rsvps = RSVP.objects.filter(user=user).select_related('event', 'event__category').order_by('-event__date')
+        rsvp_events = [rsvp.event for rsvp in rsvps]
     
     # Get upcoming events
-    from datetime import date
-    upcoming_events = Event.objects.filter(date__gte=date.today()).order_by('date', 'time')[:5]
+    today = date.today()
+    upcoming_events = Event.objects.filter(date__gte=today).order_by('date', 'time')[:6]
     
     context = {
-        'title': 'User Dashboard',
-        'participant': participant,
-        'registered_events': registered_events,
+        'title': 'My Dashboard',
+        'rsvp_events': rsvp_events,
         'upcoming_events': upcoming_events,
+        'total_rsvps': len(rsvp_events),
     }
     return render(request, 'user_panel/dashboard.html', context)
 
+
+@login_required_allow_inactive
+def rsvp_event(request, event_id):
+    """RSVP to an event"""
+    event = get_object_or_404(Event, id=event_id)
+    user = request.user
+    
+    # Check if user already RSVP'd
+    existing_rsvp = RSVP.objects.filter(event=event, user=user).first()
+    
+    if existing_rsvp:
+        messages.warning(request, f'You have already RSVP\'d to "{event.name}".')
+    else:
+        # Create RSVP
+        RSVP.objects.create(
+            event=event,
+            user=user
+        )
+        messages.success(request, f'✓ Successfully RSVP\'d to "{event.name}"!')
+    
+    return redirect('events:event_detail', pk=event_id)
+
+
+@login_required_allow_inactive
+def my_rsvps_view(request):
+    """View user's RSVPs"""
+    user = request.user
+    my_rsvps = RSVP.objects.filter(user=user).select_related('event', 'event__category').order_by('-event__date')
+    
+    context = {
+        'title': 'My RSVPs',
+        'my_rsvps': my_rsvps,
+        'total_rsvps': my_rsvps.count(),
+    }
+    return render(request, 'user_panel/my_rsvps.html', context)

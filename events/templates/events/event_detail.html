@@ -60,18 +60,45 @@
                         </div>
                     </div>
                     <div class="flex space-x-2">
-                        <a href="{% url 'organizer:event_update' event.pk %}" class="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                            Edit
-                        </a>
-                        <a href="{% url 'organizer:event_delete' event.pk %}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                            Delete
-                        </a>
+                        {% if request.user.is_authenticated %}
+                            {% if request.user.is_superuser or request.user.groups.all.0.name == 'Admin' or request.user.groups.all.0.name == 'Organizer' %}
+                                <a href="{% url 'organizer:event_update' event.pk %}" class="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                    Edit
+                                </a>
+                                <a href="{% url 'organizer:event_delete' event.pk %}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    Delete
+                                </a>
+                            {% else %}
+                                {% if user_rsvp %}
+                                    <div class="inline-flex items-center px-6 py-3 bg-green-100 text-green-800 rounded-lg border-2 border-green-600">
+                                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Already RSVP'd
+                                    </div>
+                                {% else %}
+                                    <a href="{% url 'user_panel:rsvp_event' event.pk %}" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        RSVP to Event
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'user_panel:login' %}" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                                </svg>
+                                Login to RSVP
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -130,9 +157,9 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">Participants</h3>
+                            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">RSVPs</h3>
                             <p class="text-lg font-semibold text-gray-900">
-                                {{ event.participants.count }} {{ event.participants.count|pluralize:"participant,participants" }}
+                                {{ event.rsvps.count }} {{ event.rsvps.count|pluralize:"RSVP,RSVPs" }}
                             </p>
                         </div>
                     </div>
@@ -161,12 +188,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
                     Registered Participants
-                    <span class="ml-3 text-sm font-normal text-gray-600">({{ event.participants.count }})</span>
+                    <span class="ml-3 text-sm font-normal text-gray-600">({{ event.rsvp_set.count }})</span>
                 </h2>
             </div>
 
             <div class="px-6 py-6">
-                {% if event.participants.exists %}
+                {% if event.rsvp_set.exists %}
                     <!-- Desktop View - Table -->
                     <div class="hidden md:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -179,40 +206,38 @@
                                         Email
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Registered On
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
+                                        RSVP'd On
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                {% for participant in event.participants.all %}
+                                {% for rsvp in event.rsvp_set.all %}
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
                                                 <span class="text-blue-600 font-semibold text-sm">
-                                                    {{ participant.name|slice:":1"|upper }}
+                                                    {{ rsvp.user.username|slice:":1"|upper }}
                                                 </span>
                                             </div>
                                             <div class="ml-4">
                                                 <div class="text-sm font-medium text-gray-900">
-                                                    {{ participant.name }}
+                                                    {% if rsvp.user.get_full_name %}
+                                                        {{ rsvp.user.get_full_name }}
+                                                    {% else %}
+                                                        {{ rsvp.user.username }}
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <a href="mailto:{{ participant.email }}" class="text-sm text-blue-600 hover:text-blue-800">
-                                            {{ participant.email }}
+                                        <a href="mailto:{{ rsvp.user.email }}" class="text-sm text-blue-600 hover:text-blue-800">
+                                            {{ rsvp.user.email }}
                                         </a>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ participant.created_at|date:"M d, Y" }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{% url 'events:participant_detail' participant.pk %}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                                        {{ rsvp.responded_at|date:"M d, Y" }}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -222,30 +247,33 @@
 
                     <!-- Mobile View - Cards -->
                     <div class="md:hidden space-y-4">
-                        {% for participant in event.participants.all %}
+                        {% for rsvp in event.rsvp_set.all %}
                         <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                             <div class="flex items-start justify-between mb-3">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
                                         <span class="text-blue-600 font-semibold">
-                                            {{ participant.name|slice:":1"|upper }}
+                                            {{ rsvp.user.username|slice:":1"|upper }}
                                         </span>
                                     </div>
                                     <div class="ml-3">
-                                        <h3 class="text-lg font-semibold text-gray-900">{{ participant.name }}</h3>
-                                        <a href="mailto:{{ participant.email }}" class="text-sm text-blue-600 hover:text-blue-800">
-                                            {{ participant.email }}
+                                        <h3 class="text-lg font-semibold text-gray-900">
+                                            {% if rsvp.user.get_full_name %}
+                                                {{ rsvp.user.get_full_name }}
+                                            {% else %}
+                                                {{ rsvp.user.username }}
+                                            {% endif %}
+                                        </h3>
+                                        <a href="mailto:{{ rsvp.user.email }}" class="text-sm text-blue-600 hover:text-blue-800">
+                                            {{ rsvp.user.email }}
                                         </a>
                                     </div>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                                 <span class="text-sm text-gray-500">
-                                    Registered: {{ participant.created_at|date:"M d, Y" }}
+                                    RSVP'd: {{ rsvp.responded_at|date:"M d, Y" }}
                                 </span>
-                                <a href="{% url 'events:participant_detail' participant.pk %}" class="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
-                                    View
-                                </a>
                             </div>
                         </div>
                         {% endfor %}

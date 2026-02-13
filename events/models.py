@@ -1,5 +1,7 @@
+
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class Category(models.Model):
@@ -16,6 +18,7 @@ class Category(models.Model):
         return self.name
 
 
+
 class Event(models.Model):
     """Model representing an event"""
     name = models.CharField(max_length=200, verbose_name="Event Name")
@@ -29,23 +32,50 @@ class Event(models.Model):
         related_name="events",
         verbose_name="Category"
     )
-    # Replace participants ManyToMany with User model
-    participants = models.ManyToManyField(
-        User,
-        related_name="registered_events",
-        verbose_name="Registered Participants",
+    image = models.ImageField(
+        upload_to='events/',
+        default='events/default.jpg',
+        blank=True,
+        null=True,
+        verbose_name="Event Image"
+    )
+    # RSVP: ManyToMany with User through RSVP model
+    rsvps = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through='RSVP',
+        related_name='rsvp_events',
+        verbose_name="RSVPs",
         blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         verbose_name = "Event"
         verbose_name_plural = "Events"
         ordering = ['-date', '-time']
-    
+
     def __str__(self):
         return f"{self.name} - {self.date}"
+
+
+# RSVP through model
+class RSVP(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE,
+        related_name='rsvp'
+    )
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    responded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'event')
+        verbose_name = 'RSVP'
+        verbose_name_plural = 'RSVPs'
+
+    def __str__(self):
+        return f"{self.user.username} RSVP'd to {self.event.name}"
 
 
 # Keep Participant model for backward compatibility (will be deprecated)
@@ -64,7 +94,6 @@ class Participant(models.Model):
         blank=True
     )
     registered_at = models.DateTimeField(auto_now_add=True)
-    
     # Link to User model
     user = models.OneToOneField(
         User,
@@ -73,11 +102,9 @@ class Participant(models.Model):
         blank=True,
         related_name="participant_profile"
     )
-    
     class Meta:
         verbose_name = "Participant (Legacy)"
         verbose_name_plural = "Participants (Legacy)"
         ordering = ['name']
-    
     def __str__(self):
         return f"{self.name} ({self.email})"

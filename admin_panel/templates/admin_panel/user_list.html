@@ -12,49 +12,58 @@
 
     <!-- Role Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-white text-base font-semibold drop-shadow-md">Admin Users</p>
-                    <p class="text-5xl font-bold mt-3 drop-shadow-lg">{{ admin_count|default:0 }}</p>
-                    <p class="text-white text-sm mt-2 drop-shadow-md">Full system access</p>
+        <!-- Admin Card -->
+        <div class="bg-white border-l-4 border-red-600 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-red-100 p-3 rounded-lg">
+                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
                 </div>
-                <div class="bg-white bg-opacity-30 rounded-full p-4">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                    </svg>
+                <p class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-2">Admin Users</p>
+                <div class="flex items-baseline">
+                    <h3 class="text-5xl font-extrabold text-gray-900">{{ admin_count|default:0 }}</h3>
                 </div>
+                <p class="text-xs font-semibold text-gray-600 mt-3">Full system access</p>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-white text-base font-semibold drop-shadow-md">Organizers</p>
-                    <p class="text-5xl font-bold mt-3 drop-shadow-lg">{{ organizer_count|default:0 }}</p>
-                    <p class="text-white text-sm mt-2 drop-shadow-md">Can manage events</p>
+        <!-- Organizers Card -->
+        <div class="bg-white border-l-4 border-blue-600 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </div>
                 </div>
-                <div class="bg-white bg-opacity-30 rounded-full p-4">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
+                <p class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-2">Organizers</p>
+                <div class="flex items-baseline">
+                    <h3 class="text-5xl font-extrabold text-gray-900">{{ organizer_count|default:0 }}</h3>
                 </div>
+                <p class="text-xs font-semibold text-gray-600 mt-3">Can manage events</p>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-white text-base font-semibold drop-shadow-md">Participants</p>
-                    <p class="text-5xl font-bold mt-3 drop-shadow-lg">{{ participant_count|default:0 }}</p>
-                    <p class="text-white text-sm mt-2 drop-shadow-md">View-only access</p>
+        <!-- Participants Card -->
+        <div class="bg-white border-l-4 border-green-600 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </div>
                 </div>
-                <div class="bg-white bg-opacity-30 rounded-full p-4">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                    </svg>
+                <p class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-2">Participants</p>
+                <div class="flex items-baseline">
+                    <h3 class="text-5xl font-extrabold text-gray-900">{{ participant_count|default:0 }}</h3>
                 </div>
+                <p class="text-xs font-semibold text-gray-600 mt-3">View-only access</p>
             </div>
         </div>
     </div>

@@ -1,7 +1,15 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group
-from .models import Category, Event, Participant
+from .models import Category, Event, Participant, RSVP
+
+# RSVP Admin
+@admin.register(RSVP)
+class RSVPAdmin(admin.ModelAdmin):
+    list_display = ('user', 'event', 'responded_at')
+    search_fields = ('user__username', 'event__name')
+    list_filter = ('responded_at',)
+    ordering = ('-responded_at',)
 
 
 # ==================== Custom User Admin ====================
@@ -57,7 +65,7 @@ class EventAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'category', 'description')
+            'fields': ('name', 'category', 'description', 'image')
         }),
         ('Schedule', {
             'fields': ('date', 'time', 'location')
@@ -71,8 +79,8 @@ class EventAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
     
     def participant_count(self, obj):
-        """Display number of participants"""
-        return obj.participants.count()
+        """Display number of participants (RSVPs)"""
+        return obj.rsvps.count()
     participant_count.short_description = 'Participants'
 
 

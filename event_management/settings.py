@@ -142,13 +142,51 @@ USE_I18N = True
 USE_TZ = True
 
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
+
+# Media files (user uploads)
+# Media files (user uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'static' / 'images'
+
+# Email and site settings
+SITE_URL = 'http://127.0.0.1:8000'  # Change to production URL as needed
+DEFAULT_FROM_EMAIL = 'noreply@eventmanagement.com'
+
+# ==============================================================================
+# EMAIL CONFIGURATION - Choose ONE option below
+# ==============================================================================
+
+# OPTION 1: Console Backend (Current - for testing, emails print in terminal)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# OPTION 2: Mailtrap (Recommended for Development - Real inbox testing)
+# Sign up free at https://mailtrap.io/ and get your credentials
+# Uncomment these lines and add your Mailtrap credentials:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+# EMAIL_PORT = 2525
+# EMAIL_HOST_USER = 'YOUR_MAILTRAP_USERNAME'  # Get from Mailtrap.io
+# EMAIL_HOST_PASSWORD = 'YOUR_MAILTRAP_PASSWORD'  # Get from Mailtrap.io
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+
+# OPTION 3: Gmail SMTP (For Production - Real Gmail account needed)
+# Uncomment these lines and add your Gmail credentials:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'your-email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'your-app-password'  # Use App Password, not regular password
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+# DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
 
 # Authentication URLs
 LOGIN_URL = '/user/login/'

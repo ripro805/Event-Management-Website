@@ -9,6 +9,7 @@ from .models import Category, Event, Participant
 
 def home(request):
     """Dashboard with statistics and filtered event list"""
+    from django.contrib.auth.models import Group
     
     # Get filter parameters
     search_query = request.GET.get('search', '').strip()
@@ -19,7 +20,14 @@ def home(request):
     
     # Calculate overall statistics
     total_events = Event.objects.count()
-    total_participants = Participant.objects.count()
+    
+    # Count only participants who are in Participant group
+    participant_group = Group.objects.filter(name='Participant').first()
+    total_participants = Participant.objects.filter(
+        user__isnull=False,
+        user__groups=participant_group
+    ).count()
+    
     total_categories = Category.objects.count()
     
     # Calculate upcoming and past events counts
@@ -27,7 +35,7 @@ def home(request):
     past_events_count = Event.objects.filter(date__lt=today).count()
     
     # Base queryset with optimizations
-    base_queryset = Event.objects.select_related('category').prefetch_related('participants')
+    base_queryset = Event.objects.select_related('category').prefetch_related('rsvps')
     
     # Apply filters
     if search_query:
@@ -53,8 +61,8 @@ def home(request):
         filter_label = "Today's Events"
         filter_param = 'today'
     
-    # Annotate with participant count
-    events = events.annotate(participant_count=Count('participants'))
+    # Annotate with RSVP count
+    events = events.annotate(rsvp_count=Count('rsvps'))
     
     # Get recent categories
     recent_categories = Category.objects.all()[:5]
@@ -77,8 +85,8 @@ def home(request):
 
 def event_list(request):
     """Public event listing with filters"""
-    events = Event.objects.select_related('category').prefetch_related('participants').annotate(
-        participant_count=Count('participants')
+    events = Event.objects.select_related('category').prefetch_related('rsvps').annotate(
+        rsvp_count=Count('rsvps')
     )
     
     # Apply filters
@@ -118,11 +126,19 @@ def event_list(request):
 def event_detail(request, pk):
     """Public event detail view"""
     event = get_object_or_404(
-        Event.objects.select_related('category').prefetch_related('participants'),
+        Event.objects.select_related('category').prefetch_related('rsvps'),
         pk=pk
     )
+    
+    # Check if user already RSVP'd
+    user_rsvp = False
+    if request.user.is_authenticated:
+        from .models import RSVP
+        user_rsvp = RSVP.objects.filter(user=request.user, event=event).exists()
+    
     context = {
         'event': event,
+        'user_rsvp': user_rsvp,
         'title': event.name
     }
     return render(request, 'events/event_detail.html', context)
@@ -152,7 +168,20 @@ def category_detail(request, pk):
 
 def participant_list(request):
     """Public participant listing"""
-    participants = Participant.objects.prefetch_related('events').all()
+    from django.db.models import Count
+    from django.contrib.auth.models import Group
+    
+    # Get Participant group
+    participant_group = Group.objects.filter(name='Participant').first()
+    
+    # Filter participants who have a user and are in Participant group
+    participants = Participant.objects.filter(
+        user__isnull=False,
+        user__groups=participant_group
+    ).annotate(
+        rsvp_count=Count('user__rsvp')
+    ).select_related('user').order_by('name')
+    
     context = {
         'participants': participants,
         'title': 'Participants'
@@ -162,12 +191,25 @@ def participant_list(request):
 
 def participant_detail(request, pk):
     """Public participant detail view"""
+    from django.db.models import Count
+    
     participant = get_object_or_404(
-        Participant.objects.prefetch_related('events__category'),
+        Participant.objects.annotate(
+            rsvp_count=Count('user__rsvp')
+        ).select_related('user'),
         pk=pk
     )
+    
+    # Get RSVP'd events
+    rsvp_events = []
+    if participant.user:
+        from .models import RSVP
+        rsvps = RSVP.objects.filter(user=participant.user).select_related('event', 'event__category').order_by('-event__date')
+        rsvp_events = [rsvp.event for rsvp in rsvps]
+    
     context = {
         'participant': participant,
+        'rsvp_events': rsvp_events,
         'title': participant.name
     }
     return render(request, 'events/participant_detail.html', context)

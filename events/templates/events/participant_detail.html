@@ -60,7 +60,7 @@
                     </svg>
                     <div class="ml-4">
                         <p class="text-sm text-gray-600">Total Events</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ participant.events.count }}</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ participant.rsvp_count }}</p>
                     </div>
                 </div>
             </div>
@@ -71,9 +71,9 @@
     <div class="bg-white rounded-lg shadow-md p-8">
         <h2 class="text-2xl font-bold text-gray-900 mb-6">Registered Events</h2>
         
-        {% if participant.events.all %}
+        {% if rsvp_events %}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% for event in participant.events.all %}
+            {% for event in rsvp_events %}
             <div class="border rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
                 <a href="{% url 'events:event_detail' event.pk %}" class="block">
                     <div class="flex justify-between items-start mb-3">
