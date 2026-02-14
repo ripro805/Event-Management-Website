@@ -51,26 +51,13 @@ def signup_view(request):
         form = UserSignupForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False  # Require email activation
+            user.is_active = False  # User must activate via email link
             user.save()
             
-            # Check which email backend is being used
-            from django.conf import settings
-            email_backend = settings.EMAIL_BACKEND
-            
-            if 'console' in email_backend:
-                messages.success(
-                    request, 
-                    f'✓ Account created successfully! '
-                    f'Please check your TERMINAL/CONSOLE for the activation link '
-                    f'(using console email backend for development).'
-                )
-            else:
-                messages.success(
-                    request, 
-                    f'✓ Account created successfully! '
-                    f'Please check your email inbox for the activation link.'
-                )
+            messages.success(
+                request, 
+                f'✓ Account created successfully! Please check your email ({user.email}) for an activation link to complete your registration.'
+            )
             return redirect('user_panel:login')
         else:
             messages.error(request, 'Please correct the errors below.')
@@ -95,28 +82,30 @@ def login_view(request):
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             
-            # TEMPORARY: Allow inactive users to login for testing
-            # Try to get user manually first
-            try:
-                user = User.objects.get(username=username)
-                if user.check_password(password):
-                    # Password is correct, allow login even if inactive
-                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                    if not user.is_active:
-                        messages.info(request, f'ℹ️ Welcome {user.first_name or user.username}! (Logged in with inactive account for testing)')
-                    else:
-                        messages.success(request, f'Welcome back, {user.first_name or user.username}!')
-                    # Role-based redirect
-                    if user.is_superuser or user.groups.filter(name='Admin').exists():
-                        return redirect('admin_panel:admin_dashboard')
-                    elif user.groups.filter(name='Organizer').exists():
-                        return redirect('organizer:dashboard')
-                    else:
-                        return redirect('user_panel:dashboard')
+            # Authenticate user (only active users can login)
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {user.first_name or user.username}!')
+                
+                # Role-based redirect
+                if user.is_superuser or user.groups.filter(name='Admin').exists():
+                    return redirect('admin_panel:admin_dashboard')
+                elif user.groups.filter(name='Organizer').exists():
+                    return redirect('organizer:dashboard')
                 else:
+                    return redirect('user_panel:dashboard')
+            else:
+                # Check if user exists but is inactive
+                try:
+                    inactive_user = User.objects.get(username=username)
+                    if not inactive_user.is_active:
+                        messages.warning(request, '⚠️ Your account is not activated yet. Please check your email for the activation link.')
+                    else:
+                        messages.error(request, 'Invalid username or password. Please try again.')
+                except User.DoesNotExist:
                     messages.error(request, 'Invalid username or password. Please try again.')
-            except User.DoesNotExist:
-                messages.error(request, 'Invalid username or password. Please try again.')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
