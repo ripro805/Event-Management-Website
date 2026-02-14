@@ -49,7 +49,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # Add WhiteNoise
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # WhiteNoise for static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -94,15 +94,12 @@ WSGI_APPLICATION = "event_management.wsgi.application"
 #     }
 # }
 
-# For PostgreSQL - Use DATABASE_URL from environment or fallback to individual configs
+# For PostgreSQL (Active)
+# Use DATABASE_URL if available (production), otherwise use individual config (local)
 DATABASES = {
     'default': dj_database_url.config(
-        default=config(
-            'DATABASE_URL',
-            default=f"postgresql://{config('DB_USER', default='postgres')}:{config('DB_PASSWORD', default='ripro805')}@{config('DB_HOST', default='localhost')}:{config('DB_PORT', default='5432')}/{config('DB_NAME', default='event_management')}"
-        ),
-        conn_max_age=600,
-        conn_health_checks=True,
+        default=f"postgresql://{config('DB_USER', default='postgres')}:{config('DB_PASSWORD', default='ripro805')}@{config('DB_HOST', default='localhost')}:{config('DB_PORT', default='5432')}/{config('DB_NAME', default='event_management')}",
+        conn_max_age=600
     )
 }
 
@@ -140,14 +137,14 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # For collectstatic in production
+STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # For production
 
-# WhiteNoise settings for static files
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# WhiteNoise configuration for efficient static file serving
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files (user uploads)
 MEDIA_URL = '/media/'
