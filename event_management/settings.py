@@ -98,7 +98,7 @@ WSGI_APPLICATION = "event_management.wsgi.application"
 # Use DATABASE_URL if available (production), otherwise use individual config (local)
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"postgresql://{config('DB_USER', default='postgres')}:{config('DB_PASSWORD', default='ripro805')}@{config('DB_HOST', default='localhost')}:{config('DB_PORT', default='5432')}/{config('DB_NAME', default='event_management')}",
+        default='postgresql://event_management_db2_v54r_user:peohatVMFLeIHlLaRqITkG2h4xptdOsw@dpg-d6897tusb7us73c7ued0-a.oregon-postgres.render.com/event_management_db2_v54r',
         conn_max_age=600
     )
 }

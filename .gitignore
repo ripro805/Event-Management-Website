@@ -31,6 +31,17 @@ db.sqlite3
 db.sqlite3-journal
 staticfiles/
 
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Database backups
+*.sql
+database_backup.json
+db/
+backups/
+
 
 # Node
 node_modules/
