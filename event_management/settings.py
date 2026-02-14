@@ -99,9 +99,16 @@ WSGI_APPLICATION = "event_management.wsgi.application"
 DATABASES = {
     'default': dj_database_url.config(
         default='postgresql://event_management_db2_v54r_user:peohatVMFLeIHlLaRqITkG2h4xptdOsw@dpg-d6897tusb7us73c7ued0-a.oregon-postgres.render.com/event_management_db2_v54r',
-        conn_max_age=600
+        conn_max_age=600,
+        ssl_require=True
     )
 }
+
+# SSL configuration for production PostgreSQL (Render)
+if not DEBUG:
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require',
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
