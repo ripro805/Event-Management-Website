@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Add WhiteNoise
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -93,23 +94,17 @@ WSGI_APPLICATION = "event_management.wsgi.application"
 #     }
 # }
 
-# For PostgreSQL (Active)
+# For PostgreSQL - Use DATABASE_URL from environment or fallback to individual configs
 DATABASES = {
-    'default': {
-        'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
-        'NAME': config('DB_NAME', default='event_management'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default='ripro805'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432')
-    }
+    'default': dj_database_url.config(
+        default=config(
+            'DATABASE_URL',
+            default=f"postgresql://{config('DB_USER', default='postgres')}:{config('DB_PASSWORD', default='ripro805')}@{config('DB_HOST', default='localhost')}:{config('DB_PORT', default='5432')}/{config('DB_NAME', default='event_management')}"
+        ),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default='postgresql://event_management_db_n5j3_user:dhXqw8LmmaX0uztC10ZkiFsWbwsB1tW9@dpg-d5im83vpm1nc73dp42tg-a.oregon-postgres.render.com/event_management_db_n5j3',
-#         conn_max_age=600
-#     )
-# }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -145,10 +140,14 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # For collectstatic in production
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
+
+# WhiteNoise settings for static files
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files (user uploads)
 MEDIA_URL = '/media/'
