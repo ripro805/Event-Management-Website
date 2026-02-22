@@ -87,21 +87,21 @@ WSGI_APPLICATION = "event_management.wsgi.application"
 
 
 # For sqlite (Local Development)
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 # For PostgreSQL (Production - Uncomment for production)
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default='postgresql://event_management_db2_v54r_user:peohatVMFLeIHlLaRqITkG2h4xptdOsw@dpg-d6897tusb7us73c7ued0-a.oregon-postgres.render.com/event_management_db2_v54r',
-#         conn_max_age=600,
-#         ssl_require=True
-#     )
-# }
+DATABASES = {
+    'default': dj_database_url.config(
+        default='postgresql://event_management_db4_user:OPhpejlt2G1DVcYrFjg0U6I1WNB1Qcw6@dpg-d6dffc24d50c73aoqqc0-a.oregon-postgres.render.com/event_management_db4',
+        conn_max_age=600,
+        ssl_require=True
+    )
+}
 
 # SSL configuration for production PostgreSQL (Render)
 if not DEBUG:
