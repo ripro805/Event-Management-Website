@@ -1,6 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User, Group
 from .models import Category, Event, Participant, RSVP
 
 # RSVP Admin
@@ -10,30 +8,6 @@ class RSVPAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'event__name')
     list_filter = ('responded_at',)
     ordering = ('-responded_at',)
-
-
-# ==================== Custom User Admin ====================
-
-class CustomUserAdmin(BaseUserAdmin):
-    """Enhanced User admin with role management"""
-    list_display = ('username', 'email', 'first_name', 'last_name', 'get_roles', 'is_staff', 'is_active', 'date_joined')
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups', 'date_joined')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
-    ordering = ('-date_joined',)
-    
-    # Use base fieldsets without adding groups again (it's already in BaseUserAdmin)
-    filter_horizontal = ('groups', 'user_permissions')
-    
-    def get_roles(self, obj):
-        """Display user's roles"""
-        roles = obj.groups.values_list('name', flat=True)
-        return ', '.join(roles) if roles else 'No Role'
-    get_roles.short_description = 'Roles'
-
-
-# Unregister the default User admin and register our custom one
-admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
 
 
 # ==================== Category Admin ====================

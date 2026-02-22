@@ -1,14 +1,17 @@
 from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import RSVP, Event
 from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
 
+User = get_user_model()
+
 # 1. Send account activation email after user registration
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def send_activation_email(sender, instance, created, **kwargs):
     """
     Send activation email when user is created and not active
@@ -192,7 +195,7 @@ Event Management System - {settings.SITE_URL}
 
 
 # 3. Auto-assign Participant role to new users
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def assign_default_role(sender, instance, created, **kwargs):
     """Automatically assign Participant group to newly created users"""
     if created:
@@ -204,7 +207,7 @@ def assign_default_role(sender, instance, created, **kwargs):
 
 
 # 4. Create Participant record for new users
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_participant_record(sender, instance, created, **kwargs):
     """Create a Participant record when a new user registers"""
     from .models import Participant
@@ -218,3 +221,4 @@ def create_participant_record(sender, instance, created, **kwargs):
                 email=instance.email,
                 user=instance
             )
+
