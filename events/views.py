@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404
+from django.views.generic import ListView, DetailView
 from django.db.models import Count, Q
 from datetime import date
 from .models import Category, Event, Participant
@@ -83,110 +84,140 @@ def home(request):
     return render(request, 'events/home.html', context)
 
 
-def event_list(request):
-    """Public event listing with filters"""
-    events = Event.objects.select_related('category').prefetch_related('rsvps').annotate(
-        rsvp_count=Count('rsvps')
-    )
+class EventListView(ListView):
+    """Public event listing with filters (Converted to CBV)"""
+    model = Event
+    template_name = 'events/event_list.html'
+    context_object_name = 'events'
     
-    # Apply filters
-    category_id = request.GET.get('category')
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    search_query = request.GET.get('search', '').strip()
-    
-    if search_query:
-        events = events.filter(
-            Q(name__icontains=search_query) | Q(location__icontains=search_query)
+    def get_queryset(self):
+        """Apply filters and annotations to queryset"""
+        queryset = Event.objects.select_related('category').prefetch_related('rsvps').annotate(
+            rsvp_count=Count('rsvps')
         )
+        
+        # Apply filters
+        search_query = self.request.GET.get('search', '').strip()
+        category_id = self.request.GET.get('category')
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) | Q(location__icontains=search_query)
+            )
+        
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+        
+        if start_date:
+            queryset = queryset.filter(date__gte=start_date)
+        
+        if end_date:
+            queryset = queryset.filter(date__lte=end_date)
+        
+        return queryset
     
-    if category_id:
-        events = events.filter(category_id=category_id)
-    
-    if start_date:
-        events = events.filter(date__gte=start_date)
-    
-    if end_date:
-        events = events.filter(date__lte=end_date)
-    
-    categories = Category.objects.all()
-    
-    context = {
-        'events': events,
-        'categories': categories,
-        'selected_category': category_id,
-        'start_date': start_date,
-        'end_date': end_date,
-        'search_query': search_query,
-        'title': 'Events'
-    }
-    return render(request, 'events/event_list.html', context)
+    def get_context_data(self, **kwargs):
+        """Add additional context for the template"""
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        context['selected_category'] = self.request.GET.get('category')
+        context['start_date'] = self.request.GET.get('start_date')
+        context['end_date'] = self.request.GET.get('end_date')
+        context['search_query'] = self.request.GET.get('search', '').strip()
+        context['title'] = 'Events'
+        return context
 
 
-def event_detail(request, pk):
-    """Public event detail view"""
-    event = get_object_or_404(
-        Event.objects.select_related('category').prefetch_related('rsvps'),
-        pk=pk
-    )
+class EventDetailView(DetailView):
+    """Public event detail view (Converted to CBV)"""
+    model = Event
+    template_name = 'events/event_detail.html'
+    context_object_name = 'event'
     
-    # Check if user already RSVP'd
-    user_rsvp = False
-    if request.user.is_authenticated:
-        from .models import RSVP
-        user_rsvp = RSVP.objects.filter(user=request.user, event=event).exists()
+    def get_queryset(self):
+        """Optimize queryset with select_related and prefetch_related"""
+        return Event.objects.select_related('category').prefetch_related('rsvps')
     
-    context = {
-        'event': event,
-        'user_rsvp': user_rsvp,
-        'title': event.name
-    }
-    return render(request, 'events/event_detail.html', context)
+    def get_context_data(self, **kwargs):
+        """Add user RSVP status to context"""
+        context = super().get_context_data(**kwargs)
+        event = self.get_object()
+        
+        # Check if user already RSVP'd
+        user_rsvp = False
+        if self.request.user.is_authenticated:
+            from .models import RSVP
+            user_rsvp = RSVP.objects.filter(user=self.request.user, event=event).exists()
+        
+        context['user_rsvp'] = user_rsvp
+        context['title'] = event.name
+        return context
 
 
-def category_list(request):
-    """Public category listing"""
-    categories = Category.objects.prefetch_related('events').all()
-    context = {
-        'categories': categories,
-        'title': 'Categories'
-    }
-    return render(request, 'events/category_list.html', context)
-
-
-def category_detail(request, pk):
-    """Public category detail view"""
-    category = get_object_or_404(Category.objects.prefetch_related('events'), pk=pk)
-    events = category.events.all()
-    context = {
-        'category': category,
-        'events': events,
-        'title': f'Category: {category.name}'
-    }
-    return render(request, 'events/category_detail.html', context)
-
-
-def participant_list(request):
-    """Public participant listing"""
-    from django.db.models import Count
-    from django.contrib.auth.models import Group
+class CategoryListView(ListView):
+    """Public category listing (Converted to CBV)"""
+    model = Category
+    template_name = 'events/category_list.html'
+    context_object_name = 'categories'
     
-    # Get Participant group
-    participant_group = Group.objects.filter(name='Participant').first()
+    def get_queryset(self):
+        """Optimize queryset with prefetch_related"""
+        return Category.objects.prefetch_related('events').all()
     
-    # Filter participants who have a user and are in Participant group
-    participants = Participant.objects.filter(
-        user__isnull=False,
-        user__groups=participant_group
-    ).annotate(
-        rsvp_count=Count('user__rsvp')
-    ).select_related('user').order_by('name')
+    def get_context_data(self, **kwargs):
+        """Add title to context"""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Categories'
+        return context
+
+
+class CategoryDetailView(DetailView):
+    """Public category detail view (Converted to CBV)"""
+    model = Category
+    template_name = 'events/category_detail.html'
+    context_object_name = 'category'
     
-    context = {
-        'participants': participants,
-        'title': 'Participants'
-    }
-    return render(request, 'events/participant_list.html', context)
+    def get_queryset(self):
+        """Optimize queryset with prefetch_related"""
+        return Category.objects.prefetch_related('events')
+    
+    def get_context_data(self, **kwargs):
+        """Add events and title to context"""
+        context = super().get_context_data(**kwargs)
+        category = self.get_object()
+        context['events'] = category.events.all()
+        context['title'] = f'Category: {category.name}'
+        return context
+
+
+class ParticipantListView(ListView):
+    """Public participant listing (Converted to CBV)"""
+    model = Participant
+    template_name = 'events/participant_list.html'
+    context_object_name = 'participants'
+    
+    def get_queryset(self):
+        """Filter participants who are in Participant group with RSVP count"""
+        from django.contrib.auth.models import Group
+        
+        # Get Participant group
+        participant_group = Group.objects.filter(name='Participant').first()
+        
+        # Filter participants who have a user and are in Participant group
+        return Participant.objects.filter(
+            user__isnull=False,
+            user__groups=participant_group
+        ).annotate(
+            rsvp_count=Count('user__rsvp')
+        ).select_related('user').order_by('name')
+    
+    def get_context_data(self, **kwargs):
+        """Add title to context"""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Participants'
+        return context
 
 
 def participant_detail(request, pk):

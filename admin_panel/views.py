@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from events.models import Event, Category, Participant
 from django.db.models import Count
 from functools import wraps
+
+User = get_user_model()
 
 
 # ==================== Helper Functions ====================

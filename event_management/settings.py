@@ -86,23 +86,22 @@ WSGI_APPLICATION = "event_management.wsgi.application"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 
-# For sqlite (Uncomment to use SQLite)
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
-# For PostgreSQL (Active)
-# Use DATABASE_URL if available (production), otherwise use individual config (local)
+# For sqlite (Local Development)
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://event_management_db2_v54r_user:peohatVMFLeIHlLaRqITkG2h4xptdOsw@dpg-d6897tusb7us73c7ued0-a.oregon-postgres.render.com/event_management_db2_v54r',
-        conn_max_age=600,
-        ssl_require=True
-    )
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
 }
+
+# For PostgreSQL (Production - Uncomment for production)
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default='postgresql://event_management_db2_v54r_user:peohatVMFLeIHlLaRqITkG2h4xptdOsw@dpg-d6897tusb7us73c7ued0-a.oregon-postgres.render.com/event_management_db2_v54r',
+#         conn_max_age=600,
+#         ssl_require=True
+#     )
+# }
 
 # SSL configuration for production PostgreSQL (Render)
 if not DEBUG:
@@ -134,7 +133,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Dhaka"
 
 USE_I18N = True
 
@@ -178,6 +177,9 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='rifatrizviofficial001
 LOGIN_URL = '/user/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Custom User Model
+AUTH_USER_MODEL = 'user_panel.CustomUser'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field

@@ -1,3 +1,11 @@
+# ==================== Imports ====================
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from django.views.generic.edit import UpdateView
+from django.views.generic import TemplateView
+from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -5,8 +13,121 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
 from functools import wraps
-from events.models import Event, Participant, RSVP
 
+from events.models import Event, Participant, RSVP
+from .forms import UserSignupForm, UserLoginForm, EditProfileForm, CustomPasswordResetForm, CustomSetPasswordForm
+
+User = get_user_model()
+
+
+# ==================== Profile Views ====================
+
+class ProfileView(LoginRequiredMixin, TemplateView):
+    """View user profile - dynamic based on role"""
+    template_name = 'user_panel/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['user'] = user
+        context['role'] = user.get_role()
+        
+        # Role-specific context
+        if context['role'] == 'Admin':
+            context['admin_stats'] = {
+                'total_users': User.objects.count(),
+                'total_events': Event.objects.count(),
+            }
+        elif context['role'] == 'Organizer':
+            # Add organizer-specific stats if needed
+            context['organizer_stats'] = {
+                'events_created': Event.objects.count(),
+            }
+        elif context['role'] == 'Participant':
+            # Add participant-specific stats
+            context['participant_stats'] = {
+                'rsvp_count': RSVP.objects.filter(user=user).count(),
+            }
+        
+        return context
+
+
+# ==================== Edit Profile View ====================
+
+class EditProfileView(LoginRequiredMixin, UpdateView):
+    """Edit user profile using UpdateView CBV"""
+    model = User
+    form_class = EditProfileForm
+    template_name = 'user_panel/edit_profile.html'
+    success_url = reverse_lazy('user_panel:profile')
+    
+    def get_object(self, queryset=None):
+        return self.request.user
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Profile updated successfully!')
+        return super().form_valid(form)
+
+
+# ==================== Change Password View ====================
+
+class ChangePasswordView(LoginRequiredMixin, TemplateView):
+    """Change password view using CBV"""
+    template_name = 'user_panel/change_password.html'
+
+    def get(self, request, *args, **kwargs):
+        form = PasswordChangeForm(user=request.user)
+        # Add styling to form fields
+        for field in form.fields.values():
+            field.widget.attrs['class'] = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Password changed successfully!')
+            return redirect('user_panel:profile')
+        # Add styling to form fields
+        for field in form.fields.values():
+            field.widget.attrs['class'] = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+        return render(request, self.template_name, {'form': form})
+
+
+# ==================== Password Reset Views ====================
+
+class CustomPasswordResetView(PasswordResetView):
+    """Custom password reset view"""
+    template_name = 'user_panel/password_reset.html'
+    email_template_name = 'user_panel/password_reset_email.html'
+    subject_template_name = 'user_panel/password_reset_subject.txt'
+    form_class = CustomPasswordResetForm
+    success_url = reverse_lazy('user_panel:password_reset_done')
+    
+    def form_valid(self, form):
+        messages.info(self.request, 'Password reset email has been sent. Please check your inbox.')
+        return super().form_valid(form)
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    """Custom password reset done view"""
+    template_name = 'user_panel/password_reset_done.html'
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    """Custom password reset confirm view"""
+    template_name = 'user_panel/password_reset_confirm.html'
+    form_class = CustomSetPasswordForm
+    success_url = reverse_lazy('user_panel:password_reset_complete')
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    """Custom password reset complete view"""
+    template_name = 'user_panel/password_reset_complete.html'
+
+
+# ==================== Helper Functions ====================
 
 # Custom login_required that works with inactive users (for testing)
 def login_required_allow_inactive(view_func):
@@ -18,8 +139,9 @@ def login_required_allow_inactive(view_func):
     return _wrapped_view
 
 
+# ==================== Account Activation ====================
+
 def activate_account(request, uidb64, token):
-    User = get_user_model()
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
@@ -39,8 +161,7 @@ def activate_account(request, uidb64, token):
         return redirect('events:home')
 
 
-from .forms import UserSignupForm, UserLoginForm
-
+# ==================== Authentication Views ====================
 
 def signup_view(request):
     """User registration view"""
@@ -72,7 +193,6 @@ def signup_view(request):
 
 def login_view(request):
     """User login view"""
-    User = get_user_model()
     if request.user.is_authenticated:
         return redirect('user_panel:dashboard')
     
@@ -128,6 +248,8 @@ def logout_view(request):
     })
 
 
+# ==================== Dashboard Views ====================
+
 @login_required_allow_inactive
 def dashboard_view(request):
     """Participant dashboard"""
@@ -137,7 +259,6 @@ def dashboard_view(request):
     # Get user's RSVP'd events
     rsvp_events = []
     if user.is_authenticated:
-        from events.models import RSVP
         rsvps = RSVP.objects.filter(user=user).select_related('event', 'event__category').order_by('-event__date')
         rsvp_events = [rsvp.event for rsvp in rsvps]
     
@@ -188,3 +309,4 @@ def my_rsvps_view(request):
         'total_rsvps': my_rsvps.count(),
     }
     return render(request, 'user_panel/my_rsvps.html', context)
+

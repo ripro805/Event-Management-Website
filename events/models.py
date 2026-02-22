@@ -1,6 +1,5 @@
 
 from django.db import models
-from django.contrib.auth.models import User
 from django.conf import settings
 
 
@@ -95,7 +94,7 @@ class Participant(models.Model):
     registered_at = models.DateTimeField(auto_now_add=True)
     # Link to User model
     user = models.OneToOneField(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
