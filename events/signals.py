@@ -54,6 +54,7 @@ Event Management System - {settings.SITE_URL}
         '''
         
         try:
+            print(f"[RenderLog] Attempting to send activation email to {instance.email}")
             send_mail(
                 subject,
                 message,
@@ -61,6 +62,7 @@ Event Management System - {settings.SITE_URL}
                 [instance.email],
                 fail_silently=False,
             )
+            print(f"[RenderLog] Activation email send attempted to {instance.email}")
         except Exception as e:
             print(f"❌ Error sending activation email to {instance.email}: {e}")
 
@@ -112,6 +114,7 @@ Event Management System - {settings.SITE_URL}
         '''
         
         try:
+            print(f"[RenderLog] Attempting to send RSVP confirmation email to {user.email} for event '{event.name}'")
             send_mail(
                 subject,
                 message,
@@ -119,7 +122,7 @@ Event Management System - {settings.SITE_URL}
                 [user.email],
                 fail_silently=False,
             )
-            print(f"✓ RSVP confirmation email sent to {user.email} for event '{event.name}'")
+            print(f"[RenderLog] RSVP confirmation email send attempted to {user.email} for event '{event.name}'")
         except Exception as e:
             print(f"✗ Error sending RSVP confirmation email to {user.email}: {e}")
 
@@ -179,6 +182,7 @@ This is an automated email. Please do not reply to this message.
 Event Management System - {settings.SITE_URL}
                 '''
                 
+                print(f"[RenderLog] Attempting to send M2M RSVP confirmation email to {user.email} for event '{event.name}'")
                 send_mail(
                     subject,
                     message,
@@ -186,7 +190,7 @@ Event Management System - {settings.SITE_URL}
                     [user.email],
                     fail_silently=False,
                 )
-                print(f"✓ M2M: RSVP confirmation email sent to {user.email} for event '{event.name}'")
+                print(f"[RenderLog] M2M RSVP confirmation email send attempted to {user.email} for event '{event.name}'")
                 
             except User.DoesNotExist:
                 print(f"✗ User with ID {user_id} not found")
