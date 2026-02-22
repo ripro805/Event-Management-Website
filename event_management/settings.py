@@ -88,10 +88,7 @@ WSGI_APPLICATION = "event_management.wsgi.application"
 
 # For sqlite (Local Development)
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    'default': dj_database_url.config(default=config('DATABASE_URL'))
 }
 
 # For PostgreSQL (Production - Uncomment for production)
