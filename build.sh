@@ -4,5 +4,10 @@ set -o errexit
 
 pip install -r requirements.txt
 
-python manage.py collectstatic --no-input
+# Build Tailwind CSS (adjust if your build command is different)
+npm run build
+
+# Collect static files for Django
+python manage.py collectstatic --noinput
+
 python manage.py migrate
