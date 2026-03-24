@@ -6,15 +6,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Event Management System{% endblock %}</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
     <style>
+        html { font-family: 'Inter', system-ui, sans-serif; background: #F9FAFB; }
+        body { background: #FFFFFF; color: #111827; }
         [x-cloak] { display: none !important; }
+        /* Apple-style minimal navbar */
+        .apple-nav {
+            background: #fff;
+            box-shadow: 0 2px 8px 0 rgba(16, 30, 54, 0.04);
+            border-bottom: 1px solid #F3F4F6;
+            transition: box-shadow 0.2s;
+        }
+        /* Card style */
+        .apple-card {
+            background: #fff;
+            border: 1px solid #F3F4F6;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px 0 rgba(16, 30, 54, 0.04);
+        }
+        /* Button style */
+        .apple-btn {
+            background: #3B82F6;
+            color: #fff;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            box-shadow: 0 1px 2px 0 rgba(16, 30, 54, 0.04);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .apple-btn:hover {
+            background: #2563EB;
+            transform: scale(1.03);
+        }
+        /* Section backgrounds */
+        .section-contrast { background: #F9FAFB; }
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 { color: #111827; font-family: 'Inter', system-ui, sans-serif; }
+        p, span, li, a { color: #6B7280; }
+        /* Transitions */
+        .fade-in { opacity: 0; animation: fadeIn 0.7s ease-in forwards; }
+        @keyframes fadeIn { to { opacity: 1; } }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg sticky top-0 z-50 border-b-2 border-indigo-100">
+    <nav class="apple-nav sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <!-- Primary Navigation -->
