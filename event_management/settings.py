@@ -86,28 +86,20 @@ WSGI_APPLICATION = "event_management.wsgi.application"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 
-# For sqlite (Local Development)
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
-# For PostgreSQL (Production - Uncomment for production)
+# For Supabase PostgreSQL (Production)
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://event_management_db4_user:OPhpejlt2G1DVcYrFjg0U6I1WNB1Qcw6@dpg-d6dffc24d50c73aoqqc0-a.oregon-postgres.render.com/event_management_db4',
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
-
-# SSL configuration for production PostgreSQL (Render)
-if not DEBUG:
-    DATABASES['default']['OPTIONS'] = {
-        'sslmode': 'require',
+    'default': {
+        'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', cast=int),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
