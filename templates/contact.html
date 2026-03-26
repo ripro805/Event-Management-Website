@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-gradient-to-br from-indigo-50 to-purple-100 min-h-screen py-16 px-4">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row rounded-3xl shadow-2xl overflow-hidden">
+        <!-- Left: Contact Info Glass Card -->
+        <div class="w-full md:w-1/2 flex flex-col justify-between p-0 md:p-8 bg-cover bg-center relative" style="background-image: url('/static/images/banner/events/contact-hero.jpg'); min-height: 480px;">
+            <div class="absolute inset-0 bg-gradient-to-br from-black/70 to-purple-900/60 backdrop-blur-xl rounded-3xl"></div>
+            <div class="relative z-10 flex flex-col justify-center h-full p-8 md:p-12">
+                <div class="bg-gradient-to-br from-purple-500/40 via-indigo-500/30 to-purple-700/30 border border-purple-200/40 shadow-2xl rounded-2xl p-8 md:p-10 backdrop-blur-lg">
+                    <div class="mb-8">
+                        <span class="uppercase tracking-widest text-xs text-white/80 font-semibold bg-purple-700/60 px-3 py-1 rounded-full">Contact Us</span>
+                        <h2 class="text-4xl md:text-3xl lg:text-4xl font-extrabold text-white mt-4 mb-2 drop-shadow-lg">Let's plan the right help for your event.</h2>
+                        <p class="text-white/90 text-base md:text-lg mb-6">Tell us what kind of support you need and our team will guide you toward the right service, timing, and next steps.</p>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <span class="bg-purple-600/90 text-white p-3 rounded-full shadow-lg">
+                                <!-- Phone Icon -->
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h2.28a2 2 0 011.7 1.06l1.1 2.2a2 2 0 01-.45 2.45l-1.27 1.02a11.042 11.042 0 005.516 5.516l1.02-1.27a2 2 0 012.45-.45l2.2 1.1A2 2 0 0121 18.72V21a2 2 0 01-2 2h-1C9.163 23 1 14.837 1 5V4a2 2 0 012-2z"/></svg>
+                            </span>
+                            <div>
+                                <div class="text-white font-bold text-lg">Call Now!</div>
+                                <div class="text-white/80 text-sm">+00 123 456 789</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="bg-purple-600/90 text-white p-3 rounded-full shadow-lg">
+                                <!-- Email Icon -->
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm0 0v1a4 4 0 01-8 0v-1"/></svg>
+                            </span>
+                            <div>
+                                <div class="text-white font-bold text-lg">E-mail Us!</div>
+                                <div class="text-white/80 text-sm">support@domainname.com</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="bg-purple-600/90 text-white p-3 rounded-full shadow-lg">
+                                <!-- Location Icon -->
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 12.414a8 8 0 111.414-1.414l4.243 4.243a1 1 0 01-1.414 1.414z"/></svg>
+                            </span>
+                            <div>
+                                <div class="text-white font-bold text-lg">Our Location!</div>
+                                <div class="text-white/80 text-sm">45/2 Central Business Innovation Near International Trade Tower</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="bg-purple-600/90 text-white p-3 rounded-full shadow-lg">
+                                <!-- Clock Icon -->
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </span>
+                            <div>
+                                <div class="text-white font-bold text-lg">Support Hours</div>
+                                <div class="text-white/80 text-sm">Sat-Thu, 9:00 AM to 9:00 PM<br>Emergency support available for urgent issues.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Right: Contact Form -->
+        <div class="w-full md:w-1/2 bg-white flex flex-col justify-center p-8 md:p-12">
+            <div class="max-w-lg mx-auto w-full">
+                <h2 class="text-4xl font-extrabold text-gray-900 mb-2">Start your next event request today</h2>
+                <p class="text-gray-600 mb-6">Share a few details and we'll help you with event service, scheduling, or choosing the best solution for your needs.</p>
+                {% if success %}
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 text-green-800 rounded-lg text-center font-semibold">
+                        Thank you for contacting us! Your message has been sent successfully.
+                    </div>
+                {% endif %}
+                <form class="space-y-5" method="post" action="">
+                    {% csrf_token %}
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input type="text" name="first_name" placeholder="First Name" class="w-full md:w-1/2 p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-400 bg-gray-50 text-gray-900 placeholder-gray-400" required />
+                        <input type="text" name="last_name" placeholder="Last Name" class="w-full md:w-1/2 p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-400 bg-gray-50 text-gray-900 placeholder-gray-400" required />
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input type="text" name="mobile" placeholder="Mobile Number" class="w-full md:w-1/2 p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-400 bg-gray-50 text-gray-900 placeholder-gray-400" required />
+                        <input type="email" name="email" placeholder="E-mail Address" class="w-full md:w-1/2 p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-400 bg-gray-50 text-gray-900 placeholder-gray-400" required />
+                    </div>
+                    <textarea name="message" placeholder="Write your message here..." class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-400 bg-gray-50 text-gray-900 placeholder-gray-400" rows="5" required></textarea>
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-xl shadow-xl hover:from-indigo-600 hover:to-purple-700 transition">Send A Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

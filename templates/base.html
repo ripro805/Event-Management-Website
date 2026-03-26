@@ -51,10 +51,12 @@
         @keyframes fadeIn { to { opacity: 1; } }
     </style>
     {% block extra_css %}{% endblock %}
-</head>
+    <!-- AOS Animate On Scroll CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
     <!-- Navigation -->
-    <nav class="apple-nav sticky top-0 z-50">
+    <nav class="apple-nav sticky top-0 z-50" data-aos="fade-down" data-aos-delay="100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <!-- Primary Navigation -->
@@ -63,7 +65,7 @@
                     <a href="{% url 'events:home' %}" class="inline-flex items-center px-1 pt-1 text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition">
                         Eventia
                     </a>
-                    
+
                     {# Home - Visible to everyone #}
                     <a href="{% url 'events:home' %}" class="inline-flex items-center px-1 pt-1 {% if request.resolver_match.url_name == 'home' %}text-indigo-600 border-b-2 border-indigo-600 font-medium{% else %}text-gray-700 hover:text-indigo-600 hover:border-b-2 hover:border-gray-300{% endif %} transition-all">
                         <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,10 +74,36 @@
                         Home
                     </a>
 
+                    {# About Us - Visible to everyone #}
+                    <a href="{% url 'about' %}" class="inline-flex items-center px-1 pt-1 {% if request.resolver_match.url_name == 'about' %}text-indigo-600 border-b-2 border-indigo-600 font-medium{% else %}text-gray-700 hover:text-indigo-600 hover:border-b-2 hover:border-gray-300{% endif %} transition-all">
+                        <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                        </svg>
+                        About Us
+                    </a>
+
+                    {# Contact - Visible to everyone #}
+                    <a href="{% url 'contact' %}" class="inline-flex items-center px-1 pt-1 {% if request.resolver_match.url_name == 'contact' %}text-indigo-600 border-b-2 border-indigo-600 font-medium{% else %}text-gray-700 hover:text-indigo-600 hover:border-b-2 hover:border-gray-300{% endif %} transition-all">
+                        <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm0 0v1a4 4 0 01-8 0v-1" />
+                        </svg>
+                        Contact
+                    </a>
+
+                    {# Events link: show only for NOT authenticated users #}
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'events:event_list' %}" class="inline-flex items-center px-1 pt-1 {% if request.resolver_match.url_name == 'event_list' %}text-indigo-600 border-b-2 border-indigo-600 font-medium{% else %}text-gray-700 hover:text-indigo-600 hover:border-b-2 hover:border-gray-300{% endif %} transition-all">
+                            <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Events
+                        </a>
+                    {% endif %}
+
                     {% if user.is_authenticated %}
                         {# ========== ADMIN NAVBAR ========== #}
                         {% if user.is_superuser or user|has_group:"Admin" %}
-                            <a href="{% url 'events:event_list' %}" class="inline-flex items-center px-1 pt-1 {% if 'event' in request.resolver_match.url_name %}text-blue-600 border-b-2 border-blue-600 font-medium{% else %}text-gray-700 hover:text-blue-600 hover:border-b-2 hover:border-gray-300{% endif %} transition-all">
+                            <a href="{% url 'organizer:event_list' %}" class="inline-flex items-center px-1 pt-1 {% if 'event' in request.resolver_match.url_name %}text-blue-600 border-b-2 border-blue-600 font-medium{% else %}text-gray-700 hover:text-blue-600 hover:border-b-2 hover:border-gray-300{% endif %} transition-all">
                                 <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
@@ -401,13 +429,13 @@
     {% endif %}
 
     <!-- Main Content -->
-    <main class="flex-grow">
+    <main class="flex-grow" data-aos="fade-up" data-aos-delay="200">
         {% block content %}
         {% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 border-t border-indigo-700 mt-auto">
+    <footer class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 border-t border-indigo-700 mt-auto" data-aos="fade-up" data-aos-delay="300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="text-center">
                 <h3 class="text-2xl font-extrabold text-white mb-2">Eventia</h3>
@@ -439,5 +467,8 @@
     </script>
 
     {% block extra_js %}{% endblock %}
-</body>
+    <!-- AOS Animate On Scroll JS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>AOS.init({ once: true, duration: 900, easing: 'ease-out-cubic' });</script>
+    </body>
 </html>
