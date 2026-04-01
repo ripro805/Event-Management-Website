@@ -56,7 +56,7 @@
     </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
     <!-- Navigation -->
-    <nav class="apple-nav sticky top-0 z-50" data-aos="fade-down" data-aos-delay="100">
+    <nav class="apple-nav sticky top-0 z-50" x-data="{ sidebarOpen: false }" data-aos="fade-down" data-aos-delay="100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <!-- Primary Navigation -->
@@ -288,7 +288,7 @@
 
                 <!-- Mobile Menu Button -->
                 <div class="flex items-center lg:hidden">
-                    <button type="button" id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors">
+                    <button type="button" @click="sidebarOpen = true" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
@@ -298,95 +298,62 @@
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden lg:hidden border-t border-gray-200 bg-white">
-            <div class="px-2 pt-2 pb-3 space-y-1">
+        <!-- Sidebar Drawer for Mobile -->
+        <div x-show="sidebarOpen" @keydown.window.escape="sidebarOpen = false" class="fixed inset-0 z-50 flex lg:hidden">
+            <!-- Overlay -->
+            <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40" @click="sidebarOpen = false"></div>
+            <!-- Sidebar -->
+            <div x-show="sidebarOpen" x-transition:enter="transition ease-in-out duration-300 transform" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in-out duration-300 transform" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="relative flex-1 flex flex-col max-w-xs w-full bg-white border-r border-gray-200">
+                <div class="absolute top-0 right-0 -mr-12 pt-2">
+                    <button @click="sidebarOpen = false" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:bg-gray-200">
+                        <svg class="h-6 w-6 text-gray-700" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-2 pt-2 pb-3 space-y-1 overflow-y-auto">
                 {# Home - Visible to everyone #}
                 <a href="{% url 'events:home' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if request.resolver_match.url_name == 'home' %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">
                     🏠 Home
                 </a>
-
                 {% if user.is_authenticated %}
-                    {# ========== ADMIN MOBILE MENU ========== #}
                     {% if user.is_superuser or user|has_group:"Admin" %}
-                        <a href="{% url 'events:event_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'event' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">
-                            📅 Events
-                        </a>
-                        <a href="{% url 'events:category_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'category' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">
-                            🏷️ Categories
-                        </a>
-                        <a href="{% url 'events:participant_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'participant' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">
-                            👥 Participants
-                        </a>
-                        <a href="{% url 'admin_panel:user_list' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 transition-colors">
-                            👤 Manage Users
-                        </a>
+                        <a href="{% url 'events:event_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'event' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">📅 Events</a>
+                        <a href="{% url 'events:category_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'category' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">🏷️ Categories</a>
+                        <a href="{% url 'events:participant_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'participant' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">👥 Participants</a>
+                        <a href="{% url 'admin_panel:user_list' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 transition-colors">👤 Manage Users</a>
                         <hr class="my-2">
-                        <a href="{% url 'admin_panel:admin_dashboard' %}" class="block px-3 py-2 rounded-md text-base font-semibold bg-purple-50 text-purple-600 transition-colors">
-                            🛡️ Admin Dashboard
-                        </a>
-
-                    {# ========== ORGANIZER MOBILE MENU ========== #}
+                        <a href="{% url 'admin_panel:admin_dashboard' %}" class="block px-3 py-2 rounded-md text-base font-semibold bg-purple-50 text-purple-600 transition-colors">🛡️ Admin Dashboard</a>
                     {% elif user|has_group:"Organizer" %}
-                        <a href="{% url 'organizer:event_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'event' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">
-                            📅 My Events
-                        </a>
-                        <a href="{% url 'organizer:category_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'category' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">
-                            🏷️ Categories
-                        </a>
-                        <a href="{% url 'organizer:participant_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'participant' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">
-                            👥 Participants
-                        </a>
+                        <a href="{% url 'organizer:event_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'event' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">📅 My Events</a>
+                        <a href="{% url 'organizer:category_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'category' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">🏷️ Categories</a>
+                        <a href="{% url 'organizer:participant_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'participant' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">👥 Participants</a>
                         <hr class="my-2">
-                        <a href="{% url 'organizer:dashboard' %}" class="block px-3 py-2 rounded-md text-base font-semibold bg-blue-50 text-blue-600 transition-colors">
-                            ✏️ Organizer Dashboard
-                        </a>
-
-                    {# ========== PARTICIPANT MOBILE MENU ========== #}
+                        <a href="{% url 'organizer:dashboard' %}" class="block px-3 py-2 rounded-md text-base font-semibold bg-blue-50 text-blue-600 transition-colors">✏️ Organizer Dashboard</a>
                     {% else %}
-                        <a href="{% url 'events:event_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'event' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">
-                            📅 Events
-                        </a>
-                        <a href="{% url 'user_panel:my_rsvps' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 transition-colors">
-                            ✅ My RSVPs
-                        </a>
+                        <a href="{% url 'events:event_list' %}" class="block px-3 py-2 rounded-md text-base font-medium {% if 'event' in request.resolver_match.url_name %}bg-blue-50 text-blue-600{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors">📅 Events</a>
+                        <a href="{% url 'user_panel:my_rsvps' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 transition-colors">✅ My RSVPs</a>
                         <hr class="my-2">
-                        <a href="{% url 'user_panel:dashboard' %}" class="block px-3 py-2 rounded-md text-base font-semibold bg-green-50 text-green-600 transition-colors">
-                            👤 My Dashboard
-                        </a>
+                        <a href="{% url 'user_panel:dashboard' %}" class="block px-3 py-2 rounded-md text-base font-semibold bg-green-50 text-green-600 transition-colors">👤 My Dashboard</a>
                     {% endif %}
-
-                    {# User Info & Logout #}
                     <div class="px-3 py-2 border-t mt-2">
                         <p class="text-xs text-gray-500">Signed in as</p>
                         <p class="text-sm font-medium text-gray-900">{{ user.first_name|default:user.username }}</p>
                         {% if user.is_superuser or user|has_group:"Admin" %}
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
-                                Admin
-                            </span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">Admin</span>
                         {% elif user|has_group:"Organizer" %}
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
-                                Organizer
-                            </span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">Organizer</span>
                         {% else %}
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mt-1">
-                                Participant
-                            </span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mt-1">Participant</span>
                         {% endif %}
                     </div>
-                    <a href="{% url 'user_panel:logout' %}" class="block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50 transition-colors">
-                        🚪 Logout
-                    </a>
-
-                {# ========== NOT AUTHENTICATED MOBILE MENU ========== #}
+                    <a href="{% url 'user_panel:logout' %}" class="block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50 transition-colors">🚪 Logout</a>
                 {% else %}
                     <hr class="my-2">
-                    <a href="{% url 'user_panel:login' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 transition-colors">
-                        🔐 Login
-                    </a>
-                    <a href="{% url 'user_panel:signup' %}" class="block px-3 py-2 rounded-md text-base font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
-                        ✍️ Sign Up
-                    </a>
+                    <a href="{% url 'user_panel:login' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 transition-colors">🔐 Login</a>
+                    <a href="{% url 'user_panel:signup' %}" class="block px-3 py-2 rounded-md text-base font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">✍️ Sign Up</a>
                 {% endif %}
+                </div>
             </div>
         </div>
     </nav>

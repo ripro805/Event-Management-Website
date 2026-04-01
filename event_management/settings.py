@@ -162,7 +162,11 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Email and site settings
-SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
+# Render provides RENDER_EXTERNAL_URL automatically for web services.
+SITE_URL = config(
+    "SITE_URL",
+    default=config("RENDER_EXTERNAL_URL", default="http://127.0.0.1:8000"),
+)
 
 # ==============================================================================
 # EMAIL CONFIGURATION - Gmail SMTP
