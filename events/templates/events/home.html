@@ -172,7 +172,7 @@
   <div class="mx-auto max-w-7xl px-4">
     <div class="mb-8 flex items-center justify-between gap-4" data-aos="fade-up" data-aos-delay="120">
       <h2 class="text-3xl font-black text-slate-900 md:text-4xl">Explore Events</h2>
-      <a href="{% url 'events:event_list' %}" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">View All</a>
+      <a href="{% url 'events:event_list' %}" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-white hover:bg-slate-50 hover:text-white">View All</a>
     </div>
 
     <form method="get" class="mb-10 flex flex-wrap gap-3" data-aos="fade-up" data-aos-delay="180">
@@ -187,11 +187,12 @@
       {% for event in events|slice:':6' %}
       <article class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm premium-lift" data-aos="zoom-in-up" data-aos-delay="{{ forloop.counter|add:'1' }}00">
         <div class="mb-4 h-44 overflow-hidden rounded-xl">
-          {% if event.image %}
-          <img src="{{ event.image.url }}" alt="{{ event.name }}" class="h-full w-full object-cover">
-          {% else %}
-          <img src="{% static 'images/events/default.jpg' %}" alt="{{ event.name }}" class="h-full w-full object-cover">
-          {% endif %}
+          <img
+            src="{% if event.image %}{{ event.image.url }}{% else %}{% static 'images/events/default.jpg' %}{% endif %}"
+            alt="{{ event.name }}"
+            class="h-full w-full object-cover"
+            onerror="this.onerror=null;this.src='{% static 'images/events/default.jpg' %}';"
+          >
         </div>
         <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-indigo-600">{{ event.category.name }}</p>
         <h3 class="mb-2 text-xl font-bold text-slate-900">{{ event.name }}</h3>
