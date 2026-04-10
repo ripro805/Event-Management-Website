@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from urllib.parse import urlparse
 from decouple import config
 import dj_database_url
 
@@ -24,10 +25,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-rxff8hi9lx&)j^nzyxw0-w7as8^0nqw+bs#0dx+%_zf70v^r8e')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+def _parse_bool(value, default=False):
+    """Safely parse boolean-like env values."""
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    normalized = str(value).strip().lower()
+    if normalized in {"1", "true", "yes", "on", "debug"}:
+        return True
+    if normalized in {"0", "false", "no", "off", "release", "prod", "production"}:
+        return False
+    return default
+
+
+DEBUG = _parse_bool(config('DEBUG', default='True'), default=True)
 
 ALLOWED_HOSTS = ['*']  # Allow all hosts for development, restrict in production
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com','http://127.0.0.1:8000']
 
 
 DEBUG_TOOLBAR_ENABLED = DEBUG
@@ -167,6 +181,25 @@ SITE_URL = config(
     "SITE_URL",
     default=config("RENDER_EXTERNAL_URL", default="http://127.0.0.1:8000"),
 )
+
+# CSRF/host configuration
+_default_origins = {
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "https://*.onrender.com",
+}
+if SITE_URL:
+    parsed_site = urlparse(SITE_URL)
+    if parsed_site.scheme and parsed_site.netloc:
+        _default_origins.add(f"{parsed_site.scheme}://{parsed_site.netloc}")
+
+CSRF_TRUSTED_ORIGINS = [origin for origin in _default_origins if origin]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+_site_uses_https = SITE_URL.lower().startswith("https://")
+CSRF_COOKIE_SECURE = _site_uses_https
+SESSION_COOKIE_SECURE = _site_uses_https
 
 # ==============================================================================
 # EMAIL CONFIGURATION - Gmail SMTP

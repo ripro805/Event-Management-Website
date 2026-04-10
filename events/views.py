@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.db.models import Count, Q
-from datetime import date
+from django.utils import timezone
 from .models import Category, Event, Participant
 
 
@@ -14,10 +14,12 @@ def home(request):
     
     # Get filter parameters
     search_query = request.GET.get('search', '').strip()
-    filter_param = request.GET.get('filter', 'today')
+    filter_param = request.GET.get('filter', 'upcoming')
     
-    # Get today's date
-    today = date.today()
+    # Get current local date/time
+    now = timezone.localtime()
+    today = now.date()
+    current_time = now.time()
     
     # Calculate overall statistics
     total_events = Event.objects.count()
@@ -42,14 +44,15 @@ def home(request):
     if search_query:
         events = base_queryset.filter(
             Q(name__icontains=search_query) | Q(location__icontains=search_query)
-        ).order_by('-date', '-time')
+        ).order_by('date', 'time')
         filter_label = "Search Results"
         filter_param = 'search'
     elif filter_param == 'today':
         events = base_queryset.filter(date=today).order_by('time')
         filter_label = "Today's Events"
     elif filter_param == 'upcoming':
-        events = base_queryset.filter(date__gte=today).order_by('date', 'time')
+        # Upcoming means strictly after today.
+        events = base_queryset.filter(date__gt=today).order_by('date', 'time')
         filter_label = "Upcoming Events"
     elif filter_param == 'past':
         events = base_queryset.filter(date__lt=today).order_by('-date', '-time')
@@ -58,15 +61,41 @@ def home(request):
         events = base_queryset.all().order_by('-date', '-time')
         filter_label = "All Events"
     else:
-        events = base_queryset.filter(date=today).order_by('time')
-        filter_label = "Today's Events"
-        filter_param = 'today'
+        events = base_queryset.filter(date__gt=today).order_by('date', 'time')
+        filter_label = "Upcoming Events"
+        filter_param = 'upcoming'
     
     # Annotate with RSVP count
     events = events.annotate(rsvp_count=Count('rsvps'))
     
+    # Get nearest upcoming event including later today.
+    countdown_event = base_queryset.filter(
+        Q(date__gt=today) | Q(date=today, time__gte=current_time)
+    ).order_by('date', 'time').first()
+
     # Get recent categories
     recent_categories = Category.objects.all()[:5]
+
+    insights_cards = [
+        {
+            "author": "Esther Howard",
+            "title": "Mastering Public Speaking: Expert Tips for Confident Presentations",
+            "excerpt": "Improve your communication skills with proven techniques used by world-class speakers.",
+            "image": "images/insights/download.jpg",
+        },
+        {
+            "author": "Esther Howard",
+            "title": "Simple Self-Defense Skills Everyone Should Learn for Safety",
+            "excerpt": "Practical safety habits and awareness methods for modern event environments.",
+            "image": "images/insights/download (1).jpg",
+        },
+        {
+            "author": "Esther Howard",
+            "title": "The Power of Networking: Building Connections That Last",
+            "excerpt": "Learn how to build meaningful professional relationships at conferences and meetups.",
+            "image": "images/insights/download (2).jpg",
+        },
+    ]
     
     context = {
         'total_events': total_events,
@@ -79,6 +108,8 @@ def home(request):
         'filter_label': filter_label,
         'search_query': search_query,
         'recent_categories': recent_categories,
+        'countdown_event': countdown_event,
+        'insights_cards': insights_cards,
         'title': 'Dashboard - Event Management System'
     }
     return render(request, 'events/home.html', context)

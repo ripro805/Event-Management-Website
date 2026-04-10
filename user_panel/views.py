@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from functools import wraps
 
 from events.models import Event, Participant, RSVP
@@ -191,6 +192,7 @@ def signup_view(request):
     })
 
 
+@ensure_csrf_cookie
 def login_view(request):
     """User login view"""
     if request.user.is_authenticated:

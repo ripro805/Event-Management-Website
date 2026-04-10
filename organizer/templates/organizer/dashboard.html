@@ -17,8 +17,8 @@
                     <p class="text-sm text-gray-600">Total Events</p>
                     <p class="text-3xl font-bold text-blue-600">{{ total_events }}</p>
                 </div>
-                <div class="bg-blue-100 p-3 rounded-full">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-blue-900/85 p-3 rounded-full border border-blue-300/30 shadow-md">
+                    <svg class="w-8 h-8 text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                 </div>
@@ -31,8 +31,8 @@
                     <p class="text-sm text-gray-600">Categories</p>
                     <p class="text-3xl font-bold text-green-600">{{ total_categories }}</p>
                 </div>
-                <div class="bg-green-100 p-3 rounded-full">
-                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-green-900/85 p-3 rounded-full border border-green-300/30 shadow-md">
+                    <svg class="w-8 h-8 text-green-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
                 </div>
@@ -45,8 +45,8 @@
                     <p class="text-sm text-gray-600">Participants</p>
                     <p class="text-3xl font-bold text-purple-600">{{ total_participants }}</p>
                 </div>
-                <div class="bg-purple-100 p-3 rounded-full">
-                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-purple-900/85 p-3 rounded-full border border-purple-300/30 shadow-md">
+                    <svg class="w-8 h-8 text-purple-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
                 </div>
@@ -59,8 +59,8 @@
                     <p class="text-sm text-gray-600">Upcoming</p>
                     <p class="text-3xl font-bold text-orange-600">{{ upcoming_events }}</p>
                 </div>
-                <div class="bg-orange-100 p-3 rounded-full">
-                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-orange-900/85 p-3 rounded-full border border-orange-300/30 shadow-md">
+                    <svg class="w-8 h-8 text-orange-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                     </svg>
                 </div>
@@ -72,59 +72,59 @@
     <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl p-8 mb-8 border border-gray-200">
         <h2 class="text-2xl font-extrabold text-gray-900 mb-6 flex items-center">
             <span class="text-3xl mr-3">🧭</span> 
-            <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Quick Navigation</span>
+            <span class="text-indigo-100">Quick Navigation</span>
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="{% url 'organizer:event_list' %}" class="flex items-center p-5 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg hover:shadow-lg hover:border-blue-500 hover:-translate-y-1 transition-all duration-200 group">
-                <div class="bg-blue-600 p-3 rounded-lg mr-3 group-hover:scale-110 transition-transform shadow-md">
+            <a href="{% url 'organizer:event_list' %}" class="flex items-center p-5 bg-blue-900/45 border border-blue-300/30 rounded-lg hover:shadow-lg hover:bg-blue-900/65 hover:-translate-y-1 transition-all duration-200 group">
+                <div class="bg-blue-800 p-3 rounded-lg mr-3 group-hover:scale-110 transition-transform shadow-md border border-blue-300/25">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                 </div>
-                <span class="text-blue-700 font-bold">My Events</span>
+                <span class="text-blue-100 font-bold">My Events</span>
             </a>
 
-            <a href="{% url 'organizer:category_list' %}" class="flex items-center p-5 bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-lg hover:shadow-lg hover:border-purple-500 hover:-translate-y-1 transition-all duration-200 group">
-                <div class="bg-purple-600 p-3 rounded-lg mr-3 group-hover:scale-110 transition-transform shadow-md">
+            <a href="{% url 'organizer:category_list' %}" class="flex items-center p-5 bg-violet-900/45 border border-violet-300/30 rounded-lg hover:shadow-lg hover:bg-violet-900/65 hover:-translate-y-1 transition-all duration-200 group">
+                <div class="bg-purple-800 p-3 rounded-lg mr-3 group-hover:scale-110 transition-transform shadow-md border border-purple-300/25">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
                 </div>
-                <span class="text-purple-700 font-bold">Categories</span>
+                <span class="text-violet-100 font-bold">Categories</span>
             </a>
 
-            <a href="{% url 'organizer:participant_list' %}" class="flex items-center p-5 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-lg hover:shadow-lg hover:border-green-500 hover:-translate-y-1 transition-all duration-200 group">
-                <div class="bg-green-600 p-3 rounded-lg mr-3 group-hover:scale-110 transition-transform shadow-md">
+            <a href="{% url 'organizer:participant_list' %}" class="flex items-center p-5 bg-emerald-900/45 border border-emerald-300/30 rounded-lg hover:shadow-lg hover:bg-emerald-900/65 hover:-translate-y-1 transition-all duration-200 group">
+                <div class="bg-green-800 p-3 rounded-lg mr-3 group-hover:scale-110 transition-transform shadow-md border border-green-300/25">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
                 </div>
-                <span class="text-green-700 font-bold">Participants</span>
+                <span class="text-emerald-100 font-bold">Participants</span>
             </a>
         </div>
     </div>
 
     <!-- Quick Actions -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 class="text-xl font-semibold text-amber-300 mb-4">Quick Actions</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="{% url 'organizer:event_create' %}" class="flex items-center p-4 border-2 border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
-                <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'organizer:event_create' %}" class="flex items-center p-4 bg-blue-900/45 border border-blue-300/30 rounded-lg hover:bg-blue-900/65 transition-colors">
+                <svg class="w-6 h-6 text-blue-100 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                <span class="text-blue-600 font-medium">Create New Event</span>
+                <span class="text-blue-100 font-medium">Create New Event</span>
             </a>
-            <a href="{% url 'organizer:category_create' %}" class="flex items-center p-4 border-2 border-green-200 rounded-lg hover:bg-green-50 transition-colors">
-                <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'organizer:category_create' %}" class="flex items-center p-4 bg-emerald-900/45 border border-emerald-300/30 rounded-lg hover:bg-emerald-900/65 transition-colors">
+                <svg class="w-6 h-6 text-emerald-100 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                <span class="text-green-600 font-medium">Create Category</span>
+                <span class="text-emerald-100 font-medium">Create Category</span>
             </a>
-            <a href="{% url 'organizer:participant_create' %}" class="flex items-center p-4 border-2 border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
-                <svg class="w-6 h-6 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'organizer:participant_create' %}" class="flex items-center p-4 bg-violet-900/45 border border-violet-300/30 rounded-lg hover:bg-violet-900/65 transition-colors">
+                <svg class="w-6 h-6 text-violet-100 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                <span class="text-purple-600 font-medium">Add Participant</span>
+                <span class="text-violet-100 font-medium">Add Participant</span>
             </a>
         </div>
     </div>
