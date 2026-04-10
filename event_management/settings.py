@@ -39,9 +39,16 @@ def _parse_bool(value, default=False):
     return default
 
 
-DEBUG = _parse_bool(config('DEBUG', default='True'), default=True)
+def _parse_csv(value, default=""):
+    """Parse comma-separated env values into a clean list."""
+    raw = value if value is not None else default
+    return [item.strip() for item in str(raw).split(",") if item.strip()]
 
-ALLOWED_HOSTS = ['*']  # Allow all hosts for development, restrict in production
+
+DEBUG = _parse_bool(config('DEBUG', default='True'), default=True)
+ALLOWED_HOSTS = _parse_csv(
+    config('ALLOWED_HOSTS', default='.onrender.com,localhost,127.0.0.1')
+)
 
 
 DEBUG_TOOLBAR_ENABLED = DEBUG
@@ -106,20 +113,30 @@ WSGI_APPLICATION = "event_management.wsgi.application"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 
-# For Supabase PostgreSQL (Production)
-DATABASES = {
-    'default': {
-        'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', cast=int),
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+# Prefer DATABASE_URL on hosted platforms (e.g., Render); fallback to discrete DB_* vars.
+DATABASE_URL = config('DATABASE_URL', default='')
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST'),
+            'PORT': config('DB_PORT', cast=int),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
