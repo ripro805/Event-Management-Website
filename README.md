@@ -41,6 +41,8 @@ A comprehensive full-stack event management web application built with Django, P
 - **Filter by Category**: Browse events by specific categories
 - **Query Optimization**: Optimized database queries using `select_related()` and `prefetch_related()`
 - **Image Upload**: Event image management with Pillow
+- **Smart Image Fallback**: Event cards now auto-fallback to a default image when an uploaded image is missing/unreachable
+- **Production Config Hardening**: Environment-based `ALLOWED_HOSTS` parsing and `DATABASE_URL` priority with `DB_*` fallback
 - **Debug Toolbar**: Development debugging and performance monitoring
 
 ---
@@ -136,7 +138,10 @@ DEFAULT_FROM_EMAIL=your-email@gmail.com
 
 # Site Configuration
 SITE_URL=http://127.0.0.1:8000
-ALLOWED_HOSTS=*
+ALLOWED_HOSTS=127.0.0.1,localhost
+
+# Optional (hosted deployment): if provided, this takes priority over DB_* settings
+# DATABASE_URL=postgresql://user:pass@host:5432/db
 ```
 
 ### 6. Setup Database
@@ -334,9 +339,19 @@ event_management/
 ```env
 SECRET_KEY=production-secret-key
 DEBUG=False
-ALLOWED_HOSTS=.onrender.com
+SITE_URL=https://your-app.onrender.com
+ALLOWED_HOSTS=your-app.onrender.com,localhost,127.0.0.1
+
+# Preferred on Render
 DATABASE_URL=postgresql://user:pass@host:5432/db
-CSRF_TRUSTED_ORIGINS=https://your-app.onrender.com
+
+# Or, alternatively, use DB_* variables
+# DB_ENGINE=django.db.backends.postgresql
+# DB_NAME=postgres
+# DB_USER=your-db-user
+# DB_PASSWORD=your-db-password
+# DB_HOST=your-db-host
+# DB_PORT=5432
 
 # Email settings
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
@@ -347,6 +362,13 @@ EMAIL_HOST_PASSWORD=your-app-password
 EMAIL_USE_TLS=True
 DEFAULT_FROM_EMAIL=your-email@gmail.com
 ```
+
+### Media Files on Render (Important)
+- Static files are served with WhiteNoise after `collectstatic`.
+- Uploaded media files (event/user uploads) should use:
+  - **Render Persistent Disk**, or
+  - external storage (e.g., Cloudinary / S3)
+- Without persistent/external storage, media files may disappear after restart/redeploy.
 
 ### Build Command
 ```bash
